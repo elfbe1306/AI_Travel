@@ -13,7 +13,7 @@ export default function Login() {
       
       <View style={styles.container}>
         <Text style={styles.title}>
-					AI TRAVEL
+					AI TRAVELING
         </Text>
 
         <Text style={styles.title_context}>
