@@ -6,7 +6,7 @@ import { Colors } from '../constants/Colors'
 export default function Login() {
   return (
     <View>
-      <View style={{backgroundColor: Colors.YELLOW, height: '75%'}}>
+      <View style={{backgroundColor: Colors.YELLOW, height: '80%'}}>
 				<Image source={require('../assets/images/Login_Page.jpg')}
 					style={styles.image}/>
       </View>
@@ -30,7 +30,7 @@ Hãy trải nghiệm ngay cùng chúng tôi nào!`}
 const styles = StyleSheet.create({
 	container: {
 		backgroundColor: Colors.YELLOW,
-		height: '25%',
+		height: '20%',
 		alignItems: "center",
 	},
 	image: {
