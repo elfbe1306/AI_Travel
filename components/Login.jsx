@@ -6,7 +6,7 @@ import { Colors } from '../constants/Colors'
 export default function Login() {
   return (
     <View>
-      <View style={{backgroundColor: Colors.YELLOW, height: '80%'}}>
+      <View style={{backgroundColor: Colors.YELLOW, height: '75%'}}>
 				<Image source={require('../assets/images/Login_Page.jpg')}
 					style={styles.image}/>
       </View>
@@ -20,6 +20,8 @@ export default function Login() {
 					{`Bạn cần lập kế hoạch du lịch?
 Hãy trải nghiệm ngay cùng chúng tôi nào!`}
         </Text>
+
+
       </View>
     </View>
   )
@@ -28,24 +30,26 @@ Hãy trải nghiệm ngay cùng chúng tôi nào!`}
 const styles = StyleSheet.create({
 	container: {
 		backgroundColor: Colors.YELLOW,
-		height: '20%',
+		height: '25%',
 		alignItems: "center",
 	},
 	image: {
 		width: '100%', height: '100%', 
 		borderBottomLeftRadius: 25, 
 		borderBottomRightRadius: 25,
-		top: -30
+		top: -50,
 	},
 	title: {
 		fontSize: 32, 
-		fontFamily: 'nunito-bold', 
+		fontFamily: 'nunito-extrabold', 
 		color: Colors.GREEN_TITLE,
+    top: -40,
 	},
 	title_context: {
-		fontSize: 16,
-		fontFamily: 'nunito-medium',
+		fontSize: 14,
+		fontFamily: 'nunito-bold',
 		color: Colors.GREEN_CONTEXT,
-		textAlign: 'center'
+		textAlign: 'center',
+    top: -40,
 	}
 })

@@ -10,6 +10,7 @@ export default function RootLayout() {
     'nunito': require('../assets/fonts/Nunito-Regular.ttf'),
     'nunito-medium': require('../assets/fonts/Nunito-Medium.ttf'),
     'nunito-bold': require('../assets/fonts/Nunito-Bold.ttf'),
+    'nunito-extrabold': require('../assets/fonts/Nunito-ExtraBold.ttf'),
   })
 
   return <Stack screenOptions={{headerShown: false}} />;
