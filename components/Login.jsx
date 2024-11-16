@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet } from 'react-native'
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 // import { Colors } from 'react-native/Libraries/NewAppScreen'
 import { Colors } from '../constants/Colors'
@@ -21,7 +21,10 @@ export default function Login() {
 					{`Bạn cần lập kế hoạch du lịch?
 Hãy trải nghiệm ngay cùng chúng tôi nào!`}
         </Text>
-
+        
+        <TouchableOpacity style={styles.create_account_button}>
+            <Text style={styles.create_account_button_text}>Tạo tài khoản</Text>
+        </TouchableOpacity>
 
       </View>
     </View>

@@ -26,5 +26,19 @@ export const styles = StyleSheet.create({
 		color: Colors.LIGHT_GREEN,
 		textAlign: 'center',
     top: -40,
+	},
+	create_account_button: {
+		backgroundColor: Colors.DARK_GREEN,
+		alignItems: 'center',
+		justifyContent: 'center',
+		paddingVertical: 15,
+		paddingHorizontal: 30,
+		borderRadius: 10,
+		top: -25,
+	},
+	create_account_button_text: {
+		color: Colors.LIGHT_YELLOW,
+		fontFamily: 'nunito-semibold',
+		fontSize: 16
 	}
 })
