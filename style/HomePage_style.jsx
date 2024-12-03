@@ -1,5 +1,4 @@
-import { View, Text, Image, StyleSheet } from 'react-native'
-import React from 'react'
+import { StyleSheet } from 'react-native'
 import { Colors } from '../constants/Colors'
 
 export const styles = StyleSheet.create({
