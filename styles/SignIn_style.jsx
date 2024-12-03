@@ -2,25 +2,25 @@ import { StyleSheet } from 'react-native'
 import { Colors } from '../constants/Colors'
 
 export const styles = StyleSheet.create({
-	SignUpPageBackGround: {
-	  flex: 1,
+	SignInPageBackGround: {
 	  height: '100%',
 	  width: '100%',
-	  justifyContent: 'center',
+	  flex: 1,
 	  alignItems: 'center',
+	  justifyContent: 'center',
 	},
-	SignUpBox: {
+	SignInBox: {
 	  backgroundColor: Colors.LIGHT_WHITE,
 	  paddingVertical: '30%',
 	  borderRadius: 25,
 	},
-	SignUpTitle: {
+	SignInTitle: {
 	  fontFamily: 'nunito-bold',
 	  fontSize: 24,
 	  textAlign: 'center',
 	  marginTop: '-25%'
 	},
-	SignUpTextInput: {
+	SignInTextInput: {
 	  paddingLeft: 10,
 	  paddingRight: '45%',
 	  paddingVertical: 10,
@@ -31,28 +31,27 @@ export const styles = StyleSheet.create({
 	  backgroundColor: 'white',
 	  fontFamily: 'nunito',
 	},
-	SignUpButton: {
-	  alignItems: 'center',
-	  marginTop: 15,
-	  paddingHorizontal: 45,
-	  paddingVertical: 10,
-	  backgroundColor: Colors.DARK_GREEN,
-	  borderRadius: 20,
-	  marginLeft: '60%',
-	  marginRight: '5%',
-	},
-	SignUpButtonText: {
-	  textAlign:'right',
-	  color: Colors.DARK_YELLOW,
-	  fontFamily: 'nunito-bold'
-	},
-	SignUpBoxGoogleText: {
+	SignInBoxGoogleText: {
 	  fontFamily: 'nunito-bold',
 	  fontSize: 20,
 	  textAlign: 'center',
 	  marginTop: 25
 	},
-	SignUpGoogleButton: {
+	SignInButton: {
+		backgroundColor: Colors.DARK_GREEN,
+		marginHorizontal: '5%',
+		marginTop: '3%',
+		justifyContent:'center',
+		alignItems: 'center',
+		paddingVertical: 10,
+		borderRadius: 10
+	},
+	SignInButtonText: {
+		color: Colors.DARK_YELLOW,
+		fontFamily: 'nunito',
+		fontSize: 18,
+	},
+	SignInGoogleButton: {
 	  backgroundColor: 'white',
 	  alignItems: 'center',
 	  paddingVertical: 10,

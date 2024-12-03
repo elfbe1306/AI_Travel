@@ -34,7 +34,7 @@ Hãy trải nghiệm ngay cùng chúng tôi nào!`}
             Bạn đã có tài khoản ? {' '}
           </Text>
 
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/auth/sign-in')}>
             <Text style = {styles.signInButton}>
               Đăng nhập
             </Text>

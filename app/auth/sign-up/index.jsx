@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { styles } from '../../../styles/SignUp_style';
 import { auth } from '../../../configs/FireBaseConfig';
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { useRouter } from 'expo-router'
 
 export default function SignUp() {
 
@@ -59,10 +60,17 @@ export default function SignUp() {
         console.log(errorCode, errorMessage);
         Alert.alert("Đăng ký thất bại", errorMessage);
       });
-  };
+    };
+
+    const router = useRouter();
   
   return (
     <ImageBackground source={require('../../../assets/images/Login_Page.jpg')} style={styles.SignUpPageBackGround}>
+
+        <TouchableOpacity style = {styles.ReturnButton} onPress={() => router.back()}>
+          <Image source={require('../../../assets/images/arrow-left-s-line.png')}/>
+        </TouchableOpacity>
+
         <KeyboardAvoidingView behavior='padding' style = {styles.SignUpBox}>
 
           <Text style={styles.SignUpTitle}>Đăng Ký Tài Khoản</Text>
