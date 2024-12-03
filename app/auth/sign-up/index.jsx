@@ -66,11 +66,6 @@ export default function SignUp() {
   
   return (
     <ImageBackground source={require('../../../assets/images/Login_Page.jpg')} style={styles.SignUpPageBackGround}>
-
-        <TouchableOpacity style = {styles.ReturnButton} onPress={() => router.back()}>
-          <Image source={require('../../../assets/images/arrow-left-s-line.png')}/>
-        </TouchableOpacity>
-
         <KeyboardAvoidingView behavior='padding' style = {styles.SignUpBox}>
 
           <Text style={styles.SignUpTitle}>Đăng Ký Tài Khoản</Text>
@@ -110,6 +105,18 @@ export default function SignUp() {
           <TouchableOpacity style = {styles.SignUpGoogleButton}>
             <Image source={require('../../../assets/images/Google_Icon.png')}/>
           </TouchableOpacity>
+
+          <View style = {styles.signInContainer}>
+            <Text style = {styles.signInText}>
+              Bạn đã có tài khoản ? {' '}
+            </Text>
+
+            <TouchableOpacity onPress={() => router.push('/auth/sign-in')}>
+              <Text style = {styles.signInButton}>
+                Đăng nhập
+              </Text>
+            </TouchableOpacity>
+          </View>
 
         </KeyboardAvoidingView>
     </ImageBackground>

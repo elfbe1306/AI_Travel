@@ -61,12 +61,17 @@ export const styles = StyleSheet.create({
 	  marginTop: '2%',
 	  borderRadius: 10
 	},
-	ReturnButton: {
-		position: 'absolute',
-		// backgroundColor: 'white',
-		left: '7%',
-		top: 100,
-		// padding: 10,
-		// borderRadius: 30
+	signInContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		marginTop: -5,
+		marginBottom: 15
+	},
+	signInText: {
+		fontFamily: 'nunito',
+	},
+	signInButton: {
+		fontFamily: 'nunito-extrabold',
 	}
 });
