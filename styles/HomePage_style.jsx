@@ -4,7 +4,7 @@ import { Colors } from '../constants/Colors'
 export const styles = StyleSheet.create({
 	container: {
 		backgroundColor: Colors.LIGHT_YELLOW,
-		height: '20%',
+		height: '25%',
 		alignItems: "center",
 	},
 	image: {
@@ -39,5 +39,18 @@ export const styles = StyleSheet.create({
 		color: Colors.LIGHT_YELLOW,
 		fontFamily: 'nunito-semibold',
 		fontSize: 16
+	},
+	signInContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		marginTop: -5
+	},
+	signInText: {
+		color: Colors.LIGHT_GRAY,
+		fontFamily: 'nunito',
+	},
+	signInButton: {
+		fontFamily: 'nunito-extrabold',
 	}
 })
