@@ -15,6 +15,7 @@ export const Colors = {
   GRAPE_GREEN: '#D3EC9E', //background 'DATE'
   LIGHT_GREEN: '#64BA50', 
   LIGHT_GRAY: '#BCBEC0',
+  LIGHT_WHITE: 'rgba(255, 255, 255, 0.44)',
   light: {
     text: '#11181C',
     background: '#fff',

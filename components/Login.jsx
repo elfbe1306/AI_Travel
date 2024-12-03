@@ -3,8 +3,12 @@ import React from 'react'
 // import { Colors } from 'react-native/Libraries/NewAppScreen'
 import { Colors } from '../constants/Colors'
 import { styles } from '../style/Login_style'
+import { useRouter } from 'expo-router'
 
 export default function Login() {
+  
+  const router = useRouter();
+
   return (
     <View>
       <View style={{backgroundColor: Colors.LIGHT_YELLOW, height: '80%'}}>
@@ -22,7 +26,7 @@ export default function Login() {
 Hãy trải nghiệm ngay cùng chúng tôi nào!`}
         </Text>
         
-        <TouchableOpacity style={styles.create_account_button}>
+        <TouchableOpacity style={styles.create_account_button} onPress={() => router.push('/auth/sign-in')}>
             <Text style={styles.create_account_button_text}>Tạo tài khoản</Text>
         </TouchableOpacity>
 
