@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
 	},
 	SignInTextInput: {
 	  paddingLeft: 10,
-	  paddingRight: '45%',
+	  paddingRight: 10,
 	  paddingVertical: 10,
 	  marginHorizontal: 20,
 	  marginTop: 15,
@@ -44,7 +44,8 @@ export const styles = StyleSheet.create({
 		justifyContent:'center',
 		alignItems: 'center',
 		paddingVertical: 10,
-		borderRadius: 10
+		borderRadius: 10,
+		paddingHorizontal: '28%'
 	},
 	SignInButtonText: {
 		color: Colors.DARK_YELLOW,

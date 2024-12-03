@@ -27,6 +27,8 @@ export default function SignUp() {
   const [fullName, setFullName] = useState();
   const [loginName, setLoginName] = useState();
 
+  const router = useRouter();
+
   const OnCreateAccount = () => {
     // Check if all fields are filled
     if (!email || !password || !fullName || !loginName) {
@@ -52,17 +54,14 @@ export default function SignUp() {
       .then((userCredential) => {
         // Signed up
         const user = userCredential.user;
-        Alert.alert("Tài khoản đã được tạo thành công!");
+        router.replace('/home');
       })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
-        console.log(errorCode, errorMessage);
         Alert.alert("Đăng ký thất bại", errorMessage);
       });
     };
-
-    const router = useRouter();
   
   return (
     <ImageBackground source={require('../../../assets/images/Login_Page.jpg')} style={styles.SignUpPageBackGround}>

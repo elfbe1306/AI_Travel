@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
 	},
 	SignUpTextInput: {
 	  paddingLeft: 10,
-	  paddingRight: '45%',
+	  paddingRight: 10,
 	  paddingVertical: 10,
 	  marginHorizontal: 20,
 	  marginTop: 15,
