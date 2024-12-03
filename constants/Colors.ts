@@ -10,12 +10,12 @@ export const Colors = {
   LIGHT_YELLOW: '#FFE68A',
   DARK_YELLOW: '#FFDF6B', //buttonpage 'WHO'
   PASTEL_GREEN: '#E8F2D4', //background 'HOME'
-  DARK_GREEN: '#02954F',
+  DARK_GREEN: '#02954F', // SignUp 'Button'
   AVOCADO_GREEN: '#A1D599', //background 'WHO' and 'SEARCH'
   GRAPE_GREEN: '#D3EC9E', //background 'DATE'
   LIGHT_GREEN: '#64BA50', 
   LIGHT_GRAY: '#BCBEC0',
-  LIGHT_WHITE: 'rgba(255, 255, 255, 0.44)',
+  LIGHT_WHITE: 'rgba(255, 255, 255, 0.44)', //background SignUpBox
   light: {
     text: '#11181C',
     background: '#fff',

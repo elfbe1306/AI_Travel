@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ImageBackground, TextInput, TouchableOpacity, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, TextInput, TouchableOpacity, Platform, KeyboardAvoidingView, Image, ScrollView } from 'react-native';
 import { Colors } from '../../../constants/Colors';
 import DateTimePicker from '@react-native-community/datetimepicker'; // Correct import for DateTimePicker
 import { useState } from 'react';
@@ -21,7 +21,7 @@ export default function SignIn() {
 
   return (
     <ImageBackground source={require('../../../assets/images/Login_Page.jpg')} style={styles.SignUpPageBackGround}>
-        <View style = {styles.SignUpBox}>
+        <KeyboardAvoidingView behavior='padding' style = {styles.SignUpBox}>
 
           <Text style={styles.SignUpTitle}>Đăng Ký Tài Khoản</Text>
 
@@ -49,33 +49,44 @@ export default function SignIn() {
             <TextInput style={styles.SignUpTextInput} placeholder="Mật khẩu:" placeholderTextColor={'black'} secureTextEntry={true}/>
           </View>
 
-        </View>
+          <TouchableOpacity style = {styles.SignUpButton}>
+            <Text style = {styles.SignUpButtonText}>Lưu</Text>
+          </TouchableOpacity>
+
+          <Text style = {styles.SignUpBoxGoogleText}>or continue with</Text>
+
+          <TouchableOpacity style = {styles.SignUpGoogleButton}>
+            <Image source={require('../../../assets/images/Google_Icon.png')}/>
+          </TouchableOpacity>
+
+        </KeyboardAvoidingView>
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   SignUpPageBackGround: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    flex: 1,
     height: '100%',
-    width: '100%'
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   SignUpBox: {
-    width: '90%',
-    height: '70%',
     backgroundColor: Colors.LIGHT_WHITE,
+    paddingVertical: '30%',
     borderRadius: 25,
   },
   SignUpTitle: {
     fontFamily: 'nunito-bold',
     fontSize: 24,
     textAlign: 'center',
-    marginTop: '10%',
+    marginTop: '-25%'
   },
   SignUpTextInput: {
-    paddingHorizontal: 10,
-    paddingVertical: 15,
+    paddingLeft: 10,
+    paddingRight: '45%',
+    paddingVertical: 10,
     marginHorizontal: 20,
     marginTop: 15,
     borderWidth: 1,
@@ -83,9 +94,36 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     fontFamily: 'nunito',
   },
-  DatePickerContainer: {
-    textAlign: 'center',
+  SignUpButton: {
     alignItems: 'center',
-    justifyContent: 'center',
-  }
+    marginTop: 15,
+    paddingHorizontal: 45,
+    paddingVertical: 10,
+    backgroundColor: Colors.DARK_GREEN,
+    borderRadius: 20,
+    marginLeft: '60%',
+    marginRight: '5%',
+  },
+  SignUpButtonText: {
+    textAlign:'right',
+    color: Colors.DARK_YELLOW,
+    fontFamily: 'nunito-bold'
+  },
+  SignUpBoxGoogleText: {
+    fontFamily: 'nunito-bold',
+    fontSize: 20,
+    textAlign: 'center',
+    marginTop: 25
+  },
+  SignUpGoogleButton: {
+    backgroundColor: 'white',
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginHorizontal: '10%',
+    marginBottom: '5%',
+    marginTop: '2%',
+    borderRadius: 10
+  },
 });
+
+
