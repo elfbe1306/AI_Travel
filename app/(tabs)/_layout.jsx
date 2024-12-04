@@ -7,7 +7,7 @@ import TabBar from '../../components/TabBar';
 
 export default function TabLayout() {
   return (
-    <Tabs tabBar={props=> <TabBar {...props}/>}>
+    <Tabs tabBar={props=> <TabBar {...props}/>} screenOptions = {{headerShown: false}}>
       <Tabs.Screen name="home" options={{title: "Nhà"}}/>
       <Tabs.Screen name="mytrip" options={{title: "Tour của tôi"}}/>
       <Tabs.Screen name="tourCreate" options={{title: ""}}/>

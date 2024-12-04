@@ -7,13 +7,13 @@ import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'; // ShareMoney 
 
 const TabBar = ({ state, descriptors, navigation }) => {
 
-    const icons = {
-        home: (props) => <Ionicons name="home-outline" size={24} color="black" {...props}/>,
-        mytrip: (props) => <Feather name="compass" size={24} color="black" {...props}/>,
-        tourCreate: (props) => <Feather name="plus" size={24} color="black" borderRadius={99} backgroundColor={Colors.DARK_GREEN} padding={12} {...props}/>,
-        shareMoney: (props) => <SimpleLineIcons name="note" size={24} color="black" {...props}/>,
-        profile: (props) => <Ionicons name="person-circle-outline" size={24} color="black" {...props}/>
-    }
+  const icons = {
+    home: (props) => <Ionicons name="home-outline" size={24} color="black" {...props}/>,
+    mytrip: (props) => <Feather name="compass" size={24} color="black" {...props}/>,
+    tourCreate: (props) => <Feather name="plus" size={24} color="black" borderRadius={99} backgroundColor={Colors.DARK_GREEN} padding={12} {...props}/>,
+    shareMoney: (props) => <SimpleLineIcons name="note" size={24} color="black" {...props}/>,
+    profile: (props) => <Ionicons name="person-circle-outline" size={24} color="black" {...props}/>
+  }
 
   return (
     <View style={styles.tabbar}>
@@ -92,7 +92,8 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         marginHorizontal: 10,
         borderRadius: 20,
-        borderCurve: 'continuous'
+        borderCurve: 'continuous',
+        backgroundColor: 'white'
     },
     tabbarItem: {
         flex: 1,

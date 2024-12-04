@@ -15,6 +15,7 @@ export const Colors = {
   GRAPE_GREEN: '#D3EC9E', //background 'DATE'
   LIGHT_GREEN: '#64BA50', 
   LIGHT_GRAY: '#BCBEC0',
+  LIME_GREEN: '#E8F2D4', // Home background
   LIGHT_WHITE: 'rgba(255, 255, 255, 0.44)', //background SignUpBox
   light: {
     text: '#11181C',
