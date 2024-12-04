@@ -1,10 +1,10 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { Colors } from '../constants/Colors'
-import { styles } from '../styles/HomePage_style'
+import { styles } from '../styles/WelcomePage_style'
 import { useRouter } from 'expo-router'
 
-export default function HomePage() {
+export default function WelcomePage() {
   
   const router = useRouter();
 

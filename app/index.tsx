@@ -1,11 +1,11 @@
 import { Text, View } from "react-native";
-import HomePage from '../components/HomePage'
+import WelcomePage from '../components/WelcomePage'
 
 export default function Index() {
   return (
     <View style={{ flex: 1}}>
         
-      <HomePage/>
+      <WelcomePage/>
 
     </View>
   );
