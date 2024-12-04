@@ -62,7 +62,6 @@ export default function SignIn() {
         // Save session to AsyncStorage
         await AsyncStorage.setItem('userSession', JSON.stringify({ uid: user.uid, email: user.email }));
 
-        Alert.alert("Đăng nhập thành công");
         router.push('/home'); // Navigate to home page
       })
       .catch((error) => {
