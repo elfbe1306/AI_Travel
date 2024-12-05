@@ -8,14 +8,14 @@ export const styles = StyleSheet.create({
     },
     returnButton: {
         position: 'absolute',
-        marginTop: '20%',
+        marginTop: '15%',
         marginLeft: '6%',
         padding: 15,
         backgroundColor: 'white',
         borderRadius: 99
     },
     selectOptionsContainer: {
-        marginTop: '40%',
+        marginTop: '35%',
         marginHorizontal: '6%'
     },
     selectOptionsTitle: {
@@ -44,7 +44,7 @@ export const styles = StyleSheet.create({
         padding: 15,
         backgroundColor: Colors.DARK_YELLOW,
         borderRadius: 30,
-        marginLeft: '70%',
+        marginLeft: '65%',
         marginRight: '6%',
     },
     continueButtonText: {

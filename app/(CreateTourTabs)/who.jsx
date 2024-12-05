@@ -31,7 +31,7 @@ const SelectTravelsList = [
 	}
 ]
 
-export default function who() {
+export default function WhoOptions() {
     const router = useRouter();
     const [selectTraveler, setSelectTraveler] = useState();
 
@@ -64,7 +64,16 @@ export default function who() {
                 />
             </View>
 
-            <TouchableOpacity style={styles.continueButton}>
+            <TouchableOpacity
+                style={[styles.continueButton, !selectTraveler && { opacity: 0.5 }]}
+                disabled={!selectTraveler}
+                onPress={() => {
+                    router.push({
+                        pathname: 'date',
+                        params: { TourOptions: selectTraveler }
+                    });
+                }}
+            >
                 <Text style={styles.continueButtonText}>Tiếp tục</Text>
             </TouchableOpacity>
         </View>
