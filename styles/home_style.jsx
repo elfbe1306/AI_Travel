@@ -14,7 +14,7 @@ export const styles = StyleSheet.create({
       justifyContent:'space-between=',
       alignItems: 'center',
       alignContent: 'center',
-      gap: '30%',
+      gap: '25%',
       flexDirection:'row',
     },
     userNameBox: {
