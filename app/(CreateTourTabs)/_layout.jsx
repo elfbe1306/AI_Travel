@@ -5,6 +5,7 @@ const TabsLayout = () => {
         <Stack.Screen name="index"/>
         <Stack.Screen name="who"/>
         <Stack.Screen name="date"/>
+        <Stack.Screen name="bugget"/>
     </Stack>
 }
 

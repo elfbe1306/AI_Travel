@@ -70,7 +70,7 @@ export default function WhoOptions() {
                 onPress={() => {
                     router.push({
                         pathname: 'date',
-                        params: { TourOptions: selectTraveler }
+                        params: { WhoTravel: selectTraveler }
                     });
                 }}
             >
