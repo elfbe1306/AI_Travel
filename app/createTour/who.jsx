@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, FlatList, Image } from 'react-native'
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import {styles} from '../../styles/who_style'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
@@ -31,39 +31,42 @@ const SelectTravelsList = [
 	}
 ]
 
-export default function WhoTravelling() {
+export default function who() {
+    const router = useRouter();
+    const [selectTraveler, setSelectTraveler] = useState();
 
-	const router = useRouter();
+    return (
+        <View style={styles.container}>
+            <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
+                <Ionicons name="chevron-back" size={24} color="black" />
+            </TouchableOpacity>
 
-	const [selectTraveler, setSelectTraveler] = useState();
-	
-	return (
-    <View style={styles.container}>
-			<TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
-				<Ionicons name="chevron-back" size={24} color="black" />
-			</TouchableOpacity>
+            <View style={styles.selectOptionsContainer}>
+                <Text style={styles.selectOptionsTitle}>Bạn sẽ...</Text>
 
-			<View style={styles.selectOptionsContainer}>
-				<Text style={styles.selectOptionsTitle}>Bạn sẽ...</Text>
+                <FlatList
+                    data={SelectTravelsList}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity 
+                            style={[styles.selectOptionsCard, selectTraveler === item.title && { borderWidth: 2 }]} 
+                            onPress={() => setSelectTraveler(item.title)}
+                        >
+                            <View>
+                                <Text style={styles.selectOptionsCardTitle}>{item.title}</Text>
+                                <Text style={styles.selectOptionsCardDescription}>{item.desc}</Text>
+                            </View>
+                            <View>
+                                <Image source={item.icon} />
+                            </View>
+                        </TouchableOpacity>
+                    )}
+                />
+            </View>
 
-				<FlatList
-					data={SelectTravelsList}
-					keyExtractor={(item) => item.id}
-					renderItem={({item, index}) => (
-						<TouchableOpacity style = {styles.selectOptionsCard} onPress={() => setSelectTraveler(item.title)}>
-							<View>
-								<Text style={styles.selectOptionsCardTitle}>{item.title}</Text>
-								<Text style={styles.selectOptionsCardDescription}>{item.desc}</Text>
-							</View>
-
-							<View>
-								<Image source={item.icon}/>
-							</View>
-						</TouchableOpacity>
-					)}
-				/>
-
-			</View>
-    </View>
-  )
+            <TouchableOpacity style={styles.continueButton}>
+                <Text style={styles.continueButtonText}>Tiếp tục</Text>
+            </TouchableOpacity>
+        </View>
+    );
 }

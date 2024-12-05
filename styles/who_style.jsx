@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
         borderRadius: 99
     },
     selectOptionsContainer: {
-        marginTop: '45%',
+        marginTop: '40%',
         marginHorizontal: '6%'
     },
     selectOptionsTitle: {
@@ -30,7 +30,8 @@ export const styles = StyleSheet.create({
         padding: 10,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        height: 90
     },
     selectOptionsCardTitle: {
         fontFamily: 'nunito',
@@ -38,5 +39,17 @@ export const styles = StyleSheet.create({
     selectOptionsCardDescription: {
         fontFamily: 'nunito',
         color: Colors.LIGHT_GRAY,
-    }
+    },
+    continueButton: {
+        padding: 15,
+        backgroundColor: Colors.DARK_YELLOW,
+        borderRadius: 30,
+        marginLeft: '70%',
+        marginRight: '6%',
+    },
+    continueButtonText: {
+        textAlign: 'center',
+        fontFamily: 'nunito-bold',
+        color: Colors.DARK_GREEN
+    }   
 });
