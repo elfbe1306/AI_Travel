@@ -30,7 +30,7 @@ thế giới hùng vĩ`}</Text>
 
       <View style={styles.bodyContainer}>
         <View style={styles.firstBodyContainer}>
-          <Text style={{fontFamily: 'nunito-bold', fontSize: 18, color: Colors.DARK_GREEN}}>Tour của bạn</Text>
+          <Text style={{fontFamily: 'nunito-bold', fontSize: 18, color: Colors.DARK_GREEN}}>Tour của tôi</Text>
 
           <TouchableOpacity>
             <Text style={{fontFamily: 'nunito', fontSize: 12, color: Colors.DARK_GREEN}}>Xem tất cả</Text>
