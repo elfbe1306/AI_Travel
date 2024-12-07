@@ -8,6 +8,7 @@ const TabsLayout = () => {
         <Stack.Screen name="bugget"/>
         <Stack.Screen name="search"/>
         <Stack.Screen name="review"/>
+        <Stack.Screen name="loading"/>
     </Stack>
 }
 

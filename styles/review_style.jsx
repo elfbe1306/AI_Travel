@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
   reviewContainer: {
     justifyContent: 'center',
     marginTop: '50%',
-    marginHorizontal: '2%',
+    marginLeft: '2.5%',
     width: WIDTH,
     backgroundColor: Colors.LIGHT_WHITE,
     borderRadius: 20

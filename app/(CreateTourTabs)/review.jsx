@@ -89,7 +89,7 @@ export default function Review() {
           style={styles.continueButton}
           onPress={() => {
             router.push({
-              pathname: '',
+              pathname: 'loading',
               params: {
                 WhoTravel : WhoTravel, 
                 StartDate: formatDate(StartDate), 
