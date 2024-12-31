@@ -92,8 +92,8 @@ export default function Review() {
               pathname: 'loading',
               params: {
                 WhoTravel : WhoTravel, 
-                StartDate: formatDate(StartDate), 
-                EndDate: formatDate(EndDate),
+                StartDate: StartDate, 
+                EndDate: EndDate,
                 MinBugget: MinBugget,
                 MaxBugget: MaxBugget,
                 Destination: Destination
