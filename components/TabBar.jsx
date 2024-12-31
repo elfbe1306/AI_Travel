@@ -42,7 +42,11 @@ const TabBar = ({ state, descriptors, navigation }) => {
         const onPress = () => {
           if (route.name === 'tourCreate') {
             router.push('/(CreateTourTabs)'); // Use router for the custom route
-          } else {
+          }
+          else if(route.name === 'mytrip') {
+            router.push('/(TourSelection)'); // Để tạm thời để testing có gì fix lại sau
+          } 
+          else {
             const event = navigation.emit({
               type: 'tabPress',
               target: route.key,
