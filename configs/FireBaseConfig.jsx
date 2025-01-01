@@ -1,23 +1,29 @@
-// Import the functions you need from the SDKs you need
+// firebase.js
 import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getFirestore } from "firebase/firestore";
+import { initializeAuth, getReactNativePersistence } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
-
-// Your web app's Firebase configuration
+// Your Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: "sample-7440c.firebaseapp.com",
   databaseURL: "https://sample-7440c-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "sample-7440c",
-  storageBucket: "sample-7440c.firebasestorage.app",
+  storageBucket: "sample-7440c.appspot.com",
   messagingSenderId: "546734661515",
-  appId: "1:546734661515:web:5b6f8b4cb44815d8e6998e"
+  appId: "1:546734661515:web:5b6f8b4cb44815d8e6998e",
 };
 
-// Initialize Firebase
-export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Initialize Firebase App (only once)
+const app = initializeApp(firebaseConfig);
+
+// Initialize Auth with persistence (only once)
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
+
+// Initialize Firestore
+const db = getFirestore(app);
+
+export { app, auth, db };
