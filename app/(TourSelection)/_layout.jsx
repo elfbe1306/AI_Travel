@@ -4,7 +4,6 @@ const TabsLayout = () => {
   return <Stack screenOptions={{headerShown: false}}>
     <Stack.Screen name="index"/>
     <Stack.Screen name="tourStart"/>
-    <Stack.Screen name="tourSelect"/>
     <Stack.Screen name="tourFinal"/>
     <Stack.Screen name="tourTransport"/>
     <Stack.Screen name="tourFinalPreview"/>
