@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     marginTop: '32%',
 
     fontFamily: 'nunito-bold',
-    fontSize: 20,
+    fontSize: 18,
     textAlign: 'center',
     color: 'black'
   },
