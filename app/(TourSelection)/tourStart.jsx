@@ -80,7 +80,9 @@ export default function TourStart() {
             </View>
             <Text style={styles.subText}>{location.description}</Text>
             <View style={styles.ContentDetail}>
+              <View style={styles.IconDetail}>
               <Feather name="clock" size={14} color="black" />
+              </View>
               <Text style={styles.textDetail}>Thời gian tham quan: {location.visitTime}</Text>
             </View>
             <View style={styles.ContentDetail}>
@@ -101,7 +103,7 @@ export default function TourStart() {
       <TouchableOpacity style={styles.nextButton} onPress={() => router.push({ pathname: '/tourFinal', params: { selectedLocations } })}>
         <Feather name="chevron-right" size={24} color="black" />
       </TouchableOpacity>
-      
+
       {/* Code ở đây nhé nhưng mà phía trên có 2 cái thêm là renderLocation với AccorditionItem nha*/}
       <View style={styles.headTextContainer}>
         <Text style={styles.headText}>Cùng sắp xếp chuyến đi nào</Text>
