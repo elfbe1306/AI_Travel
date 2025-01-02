@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet,ScrollView } from 'react-native'
 import React from 'react'
 import { useRouter } from 'expo-router'
 import { Colors } from '../../constants/Colors';
@@ -29,7 +29,7 @@ export default function TourFinal() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.AVOCADO_GREEN,
+    backgroundColor: '#F9EFC8',
   },
   returnButton: {
     position: 'absolute',
