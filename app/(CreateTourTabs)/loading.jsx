@@ -81,6 +81,12 @@ export default function Loading() {
       await setDoc(doc(db, "UserTrips", docId), {
         userEmail,
         tripData: tripResponse,
+        WhoTravel: WhoTravel,
+        StartDate: StartDate,
+        EndDate: EndDate,
+        MinBugget: MinBugget,
+        MaxBugget: MaxBugget,
+        Destination: Destination,
       });
 
       console.log("Trip data stored successfully.");

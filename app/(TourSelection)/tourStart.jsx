@@ -1,49 +1,45 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 import Collapsible from 'react-native-collapsible';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../../configs/FireBaseConfig';
 
-// Phần này set data chung cho cả 4 ngày
-const locationsData = [
-  {
-    name: "Explora Sciences",
-    description: "Nơi trưng bày, triển lãm các thành tựu khoa học",
-    visitTime: "Thứ 3 - Chủ nhật",
-    price: "60.000 - 120.000 đồng",
-    image: require('../../assets/images/imageTourStart.png'),
-  },
-
-  {
-    name: "Nhà Thờ Làng Sông",
-    description: "Địa điểm tham quan cổ kính, hàng trăm tuổi",
-    visitTime: "Thứ 2 - Chủ nhật",
-    price: "Miễn phí",
-    image: require('../../assets/images/imageTourStart_nhatho.jpg'),
-  },
-];
 
 // Accordion component - phần này là để chỉnh chung các Accordition - 1 Acordition là 1 ngày
 const AccordionItem = ({ title, expanded, toggleAccordion, renderContent }) => (
   <View style={styles.accordionItem}>
-    <View style={[styles.header, expanded && styles.headerExpanded]}> {/* Nếu Accorditon expanded (hiện content) thì sẽ đổi từ màu trắng sang xanh lá, tương tụ cho title và mũi tên */}
+    <View style={[styles.header, expanded && styles.headerExpanded]}> 
       <Text style={[styles.title, expanded && styles.titleExpanded]}>{title}</Text> 
       <TouchableOpacity onPress={toggleAccordion}>
         <AntDesign name={expanded ? "caretdown" : "caretright"} size={20} color="#02954F" />
       </TouchableOpacity>
-            {/* Này đổi chiều mũi tên */}
     </View>
+
     <Collapsible collapsed={!expanded}>
       <View style={styles.content}>{renderContent && renderContent()}</View>
-            {/* Hiển thị content bên trong, renderContent có chứa renderLocations (code từ dòng 63) */}
     </Collapsible>
   </View>
 );
+
+const getDateRange = (startDate, endDate) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const dateArray = [];
+
+  for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
+    dateArray.push(new Date(d).toISOString().split('T')[0]); // Get the date in yyyy-mm-dd format
+  }
+
+  return dateArray;
+};
 
 // TourStart component
 export default function TourStart() {
@@ -58,15 +54,68 @@ export default function TourStart() {
     }));
   };
 
+  // Lấy email của người đăng nhập hiện tại và dữ liệu tour
+  const [userEmail, setUserEmail] = useState(null);
+  const [userTrips, setUserTrips] = useState([]);
+
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      try {
+        const userSession = await AsyncStorage.getItem('userSession');
+        if (userSession) {
+          const { email } = JSON.parse(userSession);
+          setUserEmail(email);
+          console.log("Retrieved User Email:", email);
+        } else {
+          console.error("User session not found in AsyncStorage.");
+        }
+      } catch (error) {
+        console.error("Error retrieving user session:", error);
+      }
+    };
+
+    fetchUserEmail();
+
+  }, []);
+  
+  useEffect(() => {
+    const GetMyTrips = async () => {
+      const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail))
+      const querySnapshot = await getDocs(q);
+  
+      querySnapshot.forEach((doc) => {
+        console.log(doc.id, ' => ', doc.data());
+        setUserTrips(prev => [...prev, doc.data()]);
+      });
+    }
+
+    GetMyTrips();
+
+  }, [userEmail])
+
+
+  // Tính số ngày để render
+  const [dateRange, setDateRange] = useState([]);
+
+  useEffect(() => {
+    if (userTrips.length > 0) {
+      const { StartDate, EndDate } = userTrips[0];
+      const dates = getDateRange(StartDate, EndDate);
+      setDateRange(dates);
+    }
+
+  }, [userTrips]);
+
+
   //Phần này code content được expanded ra ứng với từng ngày
   const renderLocations = (dayKey) => (
     <ScrollView>
-      {locationsData.map((location, index) => (
+      {userTrips[0]?.tripData?.places_to_visit?.map((location, index) => (
         <View key={`${dayKey}-location${index}`} style={styles.customBox}>
-          <Image source={location.image} style={styles.image} />
+          <Image source={{ uri: location.image_url }} style={styles.image} />
           <View style={styles.contentWrapper}>
             <View style={styles.headCA}>
-              <Text style={styles.locaName}>{location.name}</Text>
+              <Text style={styles.locaName}>{location.placeName}</Text>
               <View style={styles.IconWrapper}>
                 <Feather name="navigation" size={16} color="black" />
                 <TouchableOpacity onPress={() => handleIconToggle(`${dayKey}-location${index}`)}>
@@ -78,16 +127,16 @@ export default function TourStart() {
                 </TouchableOpacity>
               </View>
             </View>
-            <Text style={styles.subText}>{location.description}</Text>
+            <Text style={styles.subText}>{location.details}</Text>
             <View style={styles.ContentDetail}>
               <View style={styles.IconDetail}>
               <Feather name="clock" size={14} color="black" />
               </View>
-              <Text style={styles.textDetail}>Thời gian tham quan: {location.visitTime}</Text>
+              <Text style={styles.textDetail}>Thời gian tham quan: {location.best_time_to_visit}</Text>
             </View>
             <View style={styles.ContentDetail}>
               <Ionicons name="ticket-outline" size={15} color="black" />
-              <Text style={styles.textDetail}>Giá vé: {location.price}</Text>
+              <Text style={styles.textDetail}>Giá vé: {location.ticket_price.toLocaleString()} đồng</Text>
             </View>
           </View>
         </View>
@@ -100,7 +149,7 @@ export default function TourStart() {
       <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={24} color="black" />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.nextButton} onPress={() => router.push({ pathname: '/tourFinal', params: { selectedLocations } })}>
+      <TouchableOpacity style={styles.nextButton} onPress={() => router.push('/tourFinal')}>
         <Feather name="chevron-right" size={24} color="black" />
       </TouchableOpacity>
 
@@ -109,23 +158,25 @@ export default function TourStart() {
         <Text style={styles.headText}>Cùng sắp xếp chuyến đi nào</Text>
       </View>
     
-      {["Ngày 1", "Ngày 2", "Ngày 3", "Ngày 4"].map((day, index) => (
-        <AccordionItem
-          key={`day${index}`}
-          title={day}
-          expanded={expandedIndex === index}
-          toggleAccordion={() => setExpandedIndex(expandedIndex === index ? null : index)}
-          renderContent={() => renderLocations(`day${index}`)}
-        />
-      ))}
+      {dateRange.map((date, index) => {
+        const formattedDate = new Date(date).toLocaleDateString('vi-VN'); // Convert to dd-mm-yyyy format
+        return (
+          <AccordionItem
+            key={`day${index}`}
+            title={`Ngày ${index + 1} - ${formattedDate}`}
+            expanded={expandedIndex === index}
+            toggleAccordion={() => setExpandedIndex(expandedIndex === index ? null : index)}
+            renderContent={() => renderLocations(`day${index}`)}
+          />
+        );
+      })}
+
       <TouchableOpacity style={styles.SaveButton} onPress={() => router.push('/tourFinal')}>
         <Text style={styles.saveText}>Lưu</Text>
       </TouchableOpacity>
     </View>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   container: {
