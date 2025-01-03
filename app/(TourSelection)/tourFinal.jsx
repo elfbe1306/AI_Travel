@@ -119,14 +119,13 @@ export default function TourFinal() {
   
       userSelectedTrips.forEach((location) => {
         if (location.ticket_price) {
-          lowerCost += location.ticket_price; // Assume a 10% discount for lower bound
-          upperCost += location.ticket_price;      // Full ticket price for upper bound
+          lowerCost += location.ticket_price;
+          upperCost += location.ticket_price;    
         }
       });
   
       setLowerTotalEstimatedCost(lowerCost);
       setUpperTotalEstimatedCost(upperCost);
-      console.log("Calculated Costs:", { lowerCost, upperCost });
     }
   }, [userSelectedTrips]);
 
@@ -346,6 +345,7 @@ const styles = StyleSheet.create({
   noLocationsText: {
     textAlign: 'center',
     fontFamily: 'nunito',
-    height: 25
+    height: 25,
+    fontSize: 13
   }
 })

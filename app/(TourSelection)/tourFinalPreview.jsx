@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native'
-import React from 'react'
-import { useRouter } from 'expo-router'
+import React, { useEffect } from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Colors } from '../../constants/Colors';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -22,7 +22,11 @@ const ReviewSection = ({ icon, title, text, styles }) => (
 
 export default function TourFinalPreview() {
   const router = useRouter();
-  // const {WhoTravel, StartDate, EndDate, Budget, Destination} = useLocalSearchParams();
+  const {SelectedTransport, lowerTotalEstimatedCost, upperTotalEstimatedCost} = useLocalSearchParams();
+
+  useEffect(() => {
+    console.log(SelectedTransport, lowerTotalEstimatedCost, upperTotalEstimatedCost);
+  }, [])
 
   const WhoTravel = 'Cùng gia đình';
   const StartDate = '2024-07-20';
