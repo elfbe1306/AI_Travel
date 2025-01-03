@@ -39,4 +39,4 @@ export const AI_PROMPT = `{
     },
   ],
 } 
-Generate Travel Plan In This format, but number of place to visit is equal to 3 x Days, traveling with Family must fill all. Các miêu tả bằng tiếng việt`
+Generate Travel Plan In This format, but number of place to visit is equal to 3 x Days, traveling with {WhoTravel} must fill all, only 1 booking url for eaching kind of transportation. Các miêu tả bằng tiếng việt`

@@ -145,7 +145,7 @@ export default function TourStart() {
           );
           return (
             <View key={`${dayKey}-location${index}`} style={styles.customBox}>
-              <Image source={{ uri: location.image_url }} style={styles.image} />
+              <Image source={require('../../assets/images/imageTourStart.png')} style={styles.image} />
               <View style={styles.contentWrapper}>
                 <View style={styles.headCA}>
                   <Text style={styles.locaName}>{location.placeName}</Text>
