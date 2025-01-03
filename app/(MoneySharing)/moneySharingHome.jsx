@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, TextInput, Alert, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, Image, TextInput, Alert, FlatList, Button } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
@@ -16,13 +16,15 @@ export default function MoneySharing() {
   const [participants, setParticipants] = useState([]);
 
   const getRandomPastelColor = () => {
-    const randomColor = () => Math.floor(Math.random() * 64 + 192);
+    const randomColor = () => Math.floor(Math.random() * 64 + 180);
     return `rgb(${randomColor()}, ${randomColor()}, ${randomColor()})`;
   };
 
   const addParticipantInput = () => {
-    setParticipants([...participants, { name: '', isEditing: true, color: getRandomPastelColor() }]);
+    // Add the new participant at the beginning of the array
+    setParticipants([{ name: '', isEditing: true, color: getRandomPastelColor() }, ...participants]);
   };
+  
 
   const updateParticipantName = (index, name) => {
     const updatedParticipants = [...participants];
@@ -41,9 +43,7 @@ export default function MoneySharing() {
       <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={24} color="black" />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.nextButton} onPress={() => router.push('/moneySharingTable')}>
-        <Feather name="chevron-right" size={24} color="black" />
-      </TouchableOpacity>
+      
 
       <View style={styles.firstHeaderContainer}>
         <View style={styles.userNameBox}>
@@ -69,18 +69,19 @@ export default function MoneySharing() {
               onChangeText={setBillValue}
               value={billValue}
               placeholder="1.000.000"
+              placeholderTextColor="#CED8E6"
               keyboardType="numeric"
             />
           </View>
         </View>
         
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginRight:48 }}>
-          <Text style={styles.bodyText}>Người tham gia hoặc ứng tiền</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center',marginRight:'5%' }}>
+          <Text style={styles.bodyText}>Người tham gia </Text>
           <FlatList
-            style={{marginTop:6, height: 120}}
+            style={{width:200}}
             data={participants}
             keyExtractor={(item, index) => index.toString()}
-            
+            horizontal
             renderItem={({ item, index }) => (
               <View
                 style={{
@@ -88,7 +89,7 @@ export default function MoneySharing() {
                   alignItems: 'center',
                   marginRight: 4,
                   marginVertical:4,
-                  height:32,
+                  height:36,
                   backgroundColor: item.color,
                   borderRadius: 16,
                 }}
@@ -97,6 +98,7 @@ export default function MoneySharing() {
                   <TextInput
                     style={[styles.nameBox, { flex: 1 }]}
                     placeholder="Nhập tên"
+                    placeholderTextColor="#7D848D"
                     value={item.name}
                     onChangeText={(text) => updateParticipantName(index, text)}
                     onBlur={() => finalizeParticipantName(index)}
@@ -107,12 +109,13 @@ export default function MoneySharing() {
               </View>
             )}
           />
-        </View>
-
-        <TouchableOpacity onPress={addParticipantInput}>
+          <TouchableOpacity onPress={addParticipantInput}>
           <Entypo name="plus" size={24} style={styles.plusIcon} />
         </TouchableOpacity>
 
+        </View>
+
+        
         <View style={styles.bodyAddCategories}>
           <View style={styles.bodyMoney}>
             <Text style={styles.bodyText}>Tên mục cần chia chi phí </Text>
@@ -122,10 +125,11 @@ export default function MoneySharing() {
                 onChangeText={setCategoryName}
                 value={categoryName}
                 placeholder="Vé xem phim"
+                placeholderTextColor="#CED8E6"
               />
             </View>
           </View>
-          <View style={{ flexDirection: 'row', marginLeft: '12' }}>
+          <View style={{ flexDirection: 'row', marginLeft: '4%' }}>
             <Text style={styles.bodyText}>Số tiền </Text>
             <View style={styles.bodyAddMoney2}>
               <TextInput
@@ -134,10 +138,23 @@ export default function MoneySharing() {
                 value={categoryValue}
                 placeholder="100.000"
                 keyboardType="numeric"
+                placeholderTextColor="#CED8E6"
               />
             </View>
+            <TouchableOpacity>
+              <Entypo name="plus" size={24} style={styles.MoneyIcon} />
+            </TouchableOpacity>
           </View>
         </View>
+      </View>
+      <View>
+      <TouchableOpacity
+        onPress={() => router.push('/moneySharingTable')}
+        style={styles.nextButton}>
+        <Text style={styles.nextButtonText}>
+          Tiếp tục
+        </Text>
+      </TouchableOpacity>
       </View>
     </View>
   );

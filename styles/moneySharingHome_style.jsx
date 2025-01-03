@@ -2,7 +2,7 @@ import { StyleSheet, Dimensions } from 'react-native'
 import { Colors } from '../constants/Colors'
 
 const GAP = Dimensions.get('window').width - 320;
-const FRAMEGAP = Dimensions.get('window').width - 315;
+const FRAMEGAP = Dimensions.get('window').width - 318;
 
 export const styles = StyleSheet.create({
     container: {
@@ -60,20 +60,20 @@ export const styles = StyleSheet.create({
     },
 
     bodyText: {
-      marginVertical: 20,
+      marginVertical: '4%',
       marginLeft: 20,
-      marginRight:12,
-      fontSize: 14,
+      marginRight:'1%',
+      fontSize: 12,
       fontFamily: 'nunito-bold',
       color: '#0A6138',
     },
 
     billValue: {
       height: 32,
-      marginVertical: 12,
+      marginVertical: '3%',
       borderWidth: 1,
       padding: 10,
-      width: 273,
+      width: '64%',
       backgroundColor: 'white',
       borderColor:'#DCD7D7',
       borderRadius:16,
@@ -87,17 +87,16 @@ export const styles = StyleSheet.create({
 
     bodyMoney: {
       flexDirection: 'row',
-      width:120,
+      width:'30%',
     },
 
     bodyAddMoney1: {
       height: 32,
-      marginVertical: 18,
-      marginLeft: 16,
-      marginRight:8,
+      marginVertical: '6%',
+      marginLeft: '8%',
       borderWidth: 1,
       padding: 7,
-      width: 128,
+      width: '94%',
       backgroundColor: 'white',
       borderColor:'#DCD7D7',
       borderRadius:16,
@@ -105,11 +104,10 @@ export const styles = StyleSheet.create({
 
     bodyAddMoney2: {
       height: 32,
-      marginVertical: 18,
-      marginRight:8,
+      marginVertical: '3%',
       borderWidth: 1,
       padding: 8,
-      width: 78,
+      width: '34%',
       backgroundColor: 'white',
       borderColor:'#DCD7D7',
       borderRadius:16,
@@ -119,9 +117,13 @@ export const styles = StyleSheet.create({
     
     plusIcon: {
       color:'#0A6138',
-      position: 'absolute',
-      marginLeft: 385,
-      marginTop: -74,
+      marginRight:'-1%'
+    },
+
+    MoneyIcon: {
+      color:'#0A6138',
+      marginTop:'40%',
+      marginRight:'-1%'
     },
 
     input: {
@@ -148,12 +150,19 @@ export const styles = StyleSheet.create({
       borderRadius: 99,
     },
     nextButton: {
-      position: 'absolute',
-      marginTop: '190%',
-      marginLeft: '80%',
-      padding: 15,
-      backgroundColor: 'white',
-      borderRadius: 99,
+      backgroundColor: '#FFE68A',
+      marginLeft: '75%',
+      width: 75,
+      height:30,
+      borderRadius: 16,
+    },
+
+    nextButtonText: {
+      color: '#0A6138',
+      fontSize: 10,
+      fontFamily: 'nunito-bold',
+      textAlign:'center',
+      paddingVertical:'10%'
     },
  
 });
