@@ -1,9 +1,10 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native'
 import React from 'react'
 import { useRouter } from 'expo-router'
-import { Colors } from '../../constants/Colors';
+import { styles } from '../../styles/moneySharingFinal_style';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Feather from '@expo/vector-icons/Feather';
 
 export default function MoneySharingFinal() {
   const router = useRouter();
@@ -15,23 +16,20 @@ export default function MoneySharingFinal() {
       </TouchableOpacity>
 
       {/* Code ở đây nhé */}
+      <View style={styles.firstHeaderContainer}>
+        <View style={styles.userNameBox}>
+          <View style={styles.imageBox}>
+            <Image source={require('../../assets/images/character.png')} style={styles.userImage}/>
+          </View>
+          <Text style={styles.userName}>Doan Le Vy</Text>
+        </View>
 
-      <Text style={{marginTop: '10%'}}>MoneySharingFinal</Text>
+        <View style={styles.notificationButton}>
+          <Feather name="bell" size={30} color="black" />
+        </View>
+      </View>
+
+      <Text style={styles.firstTitle}> Phân chia chi phí </Text>
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.AVOCADO_GREEN,
-  },
-  returnButton: {
-    position: 'absolute',
-    marginTop: '15%',
-    marginLeft: '6%',
-    padding: 15,
-    backgroundColor: 'white',
-    borderRadius: 99,
-  },
-})
