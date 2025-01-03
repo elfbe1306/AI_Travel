@@ -106,7 +106,7 @@ export default function Loading() {
 
       <View style={styles.loadingContainer}>
         <Image
-          source={{ uri: 'https://i.gifer.com/YCZH.gif' }} // Replace with your desired loading image URL
+          source = {require('../../assets/images/loadingAnimation.gif')} // Replace with your desired loading image URL
           style={styles.loadingImage}
         />
         <Text style={styles.loadingText}>Đang tạo chuyến đi của bạn...</Text>
