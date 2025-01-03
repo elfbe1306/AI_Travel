@@ -74,18 +74,21 @@ export default function MoneySharing() {
           </View>
         </View>
         
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={styles.bodyText}>Người ứng tiền </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginRight:48 }}>
+          <Text style={styles.bodyText}>Người tham gia hoặc ứng tiền</Text>
           <FlatList
+            style={{marginTop:6, height: 120}}
             data={participants}
             keyExtractor={(item, index) => index.toString()}
-            horizontal
+            
             renderItem={({ item, index }) => (
               <View
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  marginLeft: 20,
+                  marginRight: 4,
+                  marginVertical:4,
+                  height:32,
                   backgroundColor: item.color,
                   borderRadius: 16,
                 }}
@@ -104,16 +107,12 @@ export default function MoneySharing() {
               </View>
             )}
           />
-         
         </View>
 
         <TouchableOpacity onPress={addParticipantInput}>
           <Entypo name="plus" size={24} style={styles.plusIcon} />
         </TouchableOpacity>
 
-        <View>
-          <Text style={styles.bodyText}>Người tham gia </Text>
-        </View>
         <View style={styles.bodyAddCategories}>
           <View style={styles.bodyMoney}>
             <Text style={styles.bodyText}>Tên mục cần chia chi phí </Text>

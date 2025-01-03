@@ -53,26 +53,27 @@ export const styles = StyleSheet.create({
     firstTitle: {
       marginTop: 20,
       marginLeft: 20,
+      marginBottom: 4,
       fontSize: 24,
       fontFamily: 'nunito-bold',
       color: '#0A6138'
     },
 
     bodyText: {
-      marginVertical: 10,
+      marginVertical: 20,
       marginLeft: 20,
       marginRight:12,
       fontSize: 14,
       fontFamily: 'nunito-bold',
-      color: '#0A6138'
+      color: '#0A6138',
     },
 
     billValue: {
-      height: 40,
-      marginVertical: 8,
+      height: 32,
+      marginVertical: 12,
       borderWidth: 1,
       padding: 10,
-      width: 283,
+      width: 273,
       backgroundColor: 'white',
       borderColor:'#DCD7D7',
       borderRadius:16,
@@ -81,6 +82,7 @@ export const styles = StyleSheet.create({
     bodyAddCategories: {
       flexDirection:'row',
       gap: FRAMEGAP,
+      marginVertical: 12,
     },
 
     bodyMoney: {
@@ -89,12 +91,12 @@ export const styles = StyleSheet.create({
     },
 
     bodyAddMoney1: {
-      height: 40,
-      marginVertical: 8,
-      marginLeft: 14,
+      height: 32,
+      marginVertical: 18,
+      marginLeft: 16,
       marginRight:8,
       borderWidth: 1,
-      padding: 10,
+      padding: 7,
       width: 128,
       backgroundColor: 'white',
       borderColor:'#DCD7D7',
@@ -102,30 +104,38 @@ export const styles = StyleSheet.create({
     },
 
     bodyAddMoney2: {
-      height: 40,
-      marginVertical: 8,
+      height: 32,
+      marginVertical: 18,
       marginRight:8,
       borderWidth: 1,
-      padding: 10,
-      width: 86,
+      padding: 8,
+      width: 78,
       backgroundColor: 'white',
       borderColor:'#DCD7D7',
       borderRadius:16,
     },
 
     // Nguoi ung tien
+    
     plusIcon: {
       color:'#0A6138',
       position: 'absolute',
       marginLeft: 385,
-      marginTop: -30
+      marginTop: -74,
     },
-    
+
+    input: {
+      fontFamily: 'nunito',
+      fontSize: 12,
+      
+    },
+
     nameBox: {
-      fontSize: 14,
+      fontSize: 12,
       fontFamily: 'nunito-bold',
       marginVertical: 8,
-      marginHorizontal: 16,
+      marginHorizontal: 10,
+      textAlign:'center'
     },
 
 
@@ -144,5 +154,6 @@ export const styles = StyleSheet.create({
       padding: 15,
       backgroundColor: 'white',
       borderRadius: 99,
-    }
+    },
+ 
 });
