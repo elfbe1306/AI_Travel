@@ -31,7 +31,7 @@ const locationsData = [
 // Accordion component - phần này là để chỉnh chung các Accordition - 1 Acordition là 1 ngày
 const AccordionItem = ({ title, expanded, toggleAccordion, renderContent }) => (
   <View style={styles.accordionItem}>
-    <View style={[styles.header, expanded && styles.headerExpanded]}> {/* Nếu Accorditon expanded (hiện content) thì sẽ đổi từ màu trắng sang xanh lá, tương tụ cho title và mũi tên */}
+    <View style={[styles.header, expanded && styles.headerExpanded]}> 
       <Text style={[styles.title, expanded && styles.titleExpanded]}>{title}</Text> 
       <TouchableOpacity onPress={toggleAccordion}>
         <AntDesign name={expanded ? "caretdown" : "caretright"} size={20} color="#02954F" />
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   headText: {
     color:'black',
     fontFamily:'nunito-bold',
-    fontSize:'20'
+    fontSize:20,
   },
   accordionItem: {
     marginTop:'8%',
