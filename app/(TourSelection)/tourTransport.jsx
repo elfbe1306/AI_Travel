@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
-import React from 'react'
-import { useRouter } from 'expo-router'
+import React, { useEffect } from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Colors } from '../../constants/Colors';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -11,6 +11,11 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function TourTransport() {
   const router = useRouter();
+  const {lowerTotalEstimatedCost, upperTotalEstimatedCost} = useLocalSearchParams();
+
+  useEffect(() => {
+    console.log(lowerTotalEstimatedCost, upperTotalEstimatedCost);
+  })
 
   const transportOptions = [
     {
