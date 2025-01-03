@@ -1,13 +1,35 @@
 import { View, Text, TouchableOpacity, StyleSheet,ScrollView } from 'react-native'
-import React from 'react'
-import { useRouter } from 'expo-router'
+import React, { useEffect, useState } from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Colors } from '../../constants/Colors';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function TourFinal() {
   const router = useRouter();
+  const [userSelectedTrips, setUserSelectedTrips] = useState([]);
+
+  useEffect(() => {
+    const fetchUserSelectedTrips = async () => {
+      try {
+        const userTrips = await AsyncStorage.getItem('selectedLocations');
+        if (userTrips) {
+          const parsedTrips = JSON.parse(userTrips);
+          setUserSelectedTrips(parsedTrips); // Directly use the parsed trips
+          console.log('Retrieved Trip Data:', parsedTrips);
+        } else {
+          console.error("User Trip not found in AsyncStorage.");
+        }
+      } catch (error) {
+        console.error("Error retrieving user trips:", error);
+      }
+    };
+
+    fetchUserSelectedTrips();
+  }, []);
+
 
   return (
     <View style={styles.container}>
@@ -21,7 +43,7 @@ export default function TourFinal() {
 
       {/* Code ở đây nhé */}
 
-      <Text>TourFinal</Text>
+      <Text></Text>
     </View>
   )
 }

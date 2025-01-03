@@ -22,24 +22,6 @@ export const AI_PROMPT = `{
       "booking_url": ""
     }
   },
-  "accommodation": [
-    {
-      "hotelName": "",
-      "hotelAddress": "",
-      "price_per_night": ,
-      "image_url": "",
-      "rating": ,
-      "description": ""
-    },
-    {
-      "hotelName": "",
-      "hotelAddress": "",
-      "price_per_night": ,
-      "image_url": "",
-      "rating": ,
-      "description": ""
-    }
-  ],
   "places_to_visit": [
     {
       "placeName": "",
@@ -57,4 +39,4 @@ export const AI_PROMPT = `{
     },
   ],
 } 
-Generate Travel Plan In This format, but number of place to visit is equal to 3 x Days, and number of accomodation is equal to 2 x Days, traveling with {WhoTravel} must fill all `
+Generate Travel Plan In This format, but number of place to visit is equal to 3 x Days, traveling with Family must fill all. Các miêu tả bằng tiếng việt`

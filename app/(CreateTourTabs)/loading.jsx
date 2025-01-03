@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { AI_PROMPT } from '../../configs/AiPrompt';
@@ -15,109 +15,134 @@ export default function Loading() {
   const [loading, setLoading] = useState(false);
 
   // Retrieve user email from AsyncStorage
-  useEffect(() => {
-    const fetchUserEmail = async () => {
-      try {
-        const userSession = await AsyncStorage.getItem('userSession');
-        if (userSession) {
-          const { email } = JSON.parse(userSession);
-          setUserEmail(email);
-          console.log("Retrieved User Email:", email);
-        } else {
-          console.error("User session not found in AsyncStorage.");
-        }
-      } catch (error) {
-        console.error("Error retrieving user session:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchUserEmail = async () => {
+  //     try {
+  //       const userSession = await AsyncStorage.getItem('userSession');
+  //       if (userSession) {
+  //         const { email } = JSON.parse(userSession);
+  //         setUserEmail(email);
+  //         console.log("Retrieved User Email:", email);
+  //       } else {
+  //         console.error("User session not found in AsyncStorage.");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error retrieving user session:", error);
+  //     }
+  //   };
 
-    fetchUserEmail();
-  }, []);
+  //   fetchUserEmail();
+  // }, []);
 
-  const calculateDaysAndNights = () => {
-    if (!StartDate || !EndDate) return { days: 0, nights: 0 };
+  // const calculateDaysAndNights = () => {
+  //   if (!StartDate || !EndDate) return { days: 0, nights: 0 };
 
-    const start = new Date(StartDate);
-    const end = new Date(EndDate);
+  //   const start = new Date(StartDate);
+  //   const end = new Date(EndDate);
 
-    const timeDiff = end - start;
+  //   const timeDiff = end - start;
 
-    const days = Math.floor(timeDiff / (1000 * 3600 * 24)) + 1;
-    const nights = days - 1;
+  //   const days = Math.floor(timeDiff / (1000 * 3600 * 24)) + 1;
+  //   const nights = days - 1;
 
-    return { days, nights };
-  };
+  //   return { days, nights };
+  // };
 
-  const { days, nights } = calculateDaysAndNights();
+  // const { days, nights } = calculateDaysAndNights();
 
-  useEffect(() => {
-    if (userEmail) {
-      generateAiTrip();
-    }
-  }, [Destination, days, nights, MinBugget, MaxBugget, WhoTravel, userEmail]);
+  // useEffect(() => {
+  //   if (userEmail) {
+  //     generateAiTrip();
+  //   }
+  // }, [Destination, days, nights, MinBugget, MaxBugget, WhoTravel, userEmail]);
 
-  const generateAiTrip = async () => {
-    if (!userEmail) {
-      console.error("User email not available. Cannot generate trip.");
-      return;
-    }
+  // const generateAiTrip = async () => {
+  //   if (!userEmail) {
+  //     console.error("User email not available. Cannot generate trip.");
+  //     return;
+  //   }
 
-    setLoading(true);
-    const FINAL_PROMPT = AI_PROMPT
-      .replace('{Destination}', Destination)
-      .replace('{days}', days)
-      .replace('{nights}', nights)
-      .replace('{MinBugget}', MinBugget)
-      .replace('{MaxBugget}', MaxBugget)
-      .replace('{WhoTravel}', WhoTravel);
+  //   setLoading(true);
+  //   const FINAL_PROMPT = AI_PROMPT
+  //     .replace('{Destination}', Destination)
+  //     .replace('{days}', days)
+  //     .replace('{nights}', nights)
+  //     .replace('{MinBugget}', MinBugget)
+  //     .replace('{MaxBugget}', MaxBugget)
+  //     .replace('{WhoTravel}', WhoTravel);
 
-    console.log(FINAL_PROMPT);
+  //   console.log(FINAL_PROMPT);
 
-    try {
-      const result = await chatSession.sendMessage(FINAL_PROMPT);
-      const tripResponse = JSON.parse(result.response.text());
+  //   try {
+  //     const result = await chatSession.sendMessage(FINAL_PROMPT);
+  //     const tripResponse = JSON.parse(result.response.text());
 
-      const docId = Date.now().toString();
-      await setDoc(doc(db, "UserTrips", docId), {
-        userEmail,
-        tripData: tripResponse,
-        WhoTravel: WhoTravel,
-        StartDate: StartDate,
-        EndDate: EndDate,
-        MinBugget: MinBugget,
-        MaxBugget: MaxBugget,
-        Destination: Destination,
-      });
+  //     const docId = Date.now().toString();
+  //     await setDoc(doc(db, "UserTrips", docId), {
+  //       userEmail,
+  //       tripData: tripResponse,
+  //       WhoTravel: WhoTravel,
+  //       StartDate: StartDate,
+  //       EndDate: EndDate,
+  //       MinBugget: MinBugget,
+  //       MaxBugget: MaxBugget,
+  //       Destination: Destination,
+  //     });
 
-      console.log("Trip data stored successfully.");
-      router.push('(TourSelection)');
-    } catch (error) {
-      console.error("Error storing trip data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     console.log("Trip data stored successfully.");
+  //     router.push('(TourSelection)');
+  //   } catch (error) {
+  //     console.error("Error storing trip data:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
-    <View>
+    <View style={styles.container}>
       <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={24} color="black" />
       </TouchableOpacity>
 
-      <Text style={{ marginTop: '50%' }}>
-        {WhoTravel}, {StartDate}, {EndDate}, {MinBugget}, {MaxBugget}, {Destination}
-      </Text>
+      <View style={styles.loadingContainer}>
+        <Image
+          source={{ uri: 'https://i.gifer.com/YCZH.gif' }} // Replace with your desired loading image URL
+          style={styles.loadingImage}
+        />
+        <Text style={styles.loadingText}>Đang tạo chuyến đi của bạn...</Text>
+      </View>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   returnButton: {
     position: 'absolute',
-    marginTop: '15%',
-    marginLeft: '6%',
+    top: '10%',
+    left: '6%',
     padding: 15,
     backgroundColor: 'white',
     borderRadius: 99,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: 'gray',
+    textAlign: 'center',
   },
 });

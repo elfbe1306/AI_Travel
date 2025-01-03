@@ -45,13 +45,23 @@ const getDateRange = (startDate, endDate) => {
 export default function TourStart() {
   const router = useRouter();
   const [expandedIndex, setExpandedIndex] = useState(null); //này dùng để tránh multiple expanded, chỉ cho phép 1 Accordition expand
-  const [iconToggles, setIconToggles] = useState({}); // này và handleIconToggle dùng để chuyển từ nút "plus-circle" thành "check" khi bấm
+  const [selectedLocations, setSelectedLocations] = useState([]); // này và handleIconToggle dùng để chuyển từ nút "plus-circle" thành "check" khi bấm
 
-  const handleIconToggle = (key) => {
-    setIconToggles((prevState) => ({
-      ...prevState,
-      [key]: !prevState[key],
-    }));
+  const handleLocationToggle = (dayKey, location) => {
+    setSelectedLocations((prevState) => {
+      const exists = prevState.find(
+        (item) => item.placeName === location.placeName && item.day === dayKey
+      );
+      if (exists) {
+        // Remove the location if already selected for the given day
+        return prevState.filter(
+          (item) => !(item.placeName === location.placeName && item.day === dayKey)
+        );
+      } else {
+        // Add the location with its associated day
+        return [...prevState, { day: dayKey, ...location }];
+      }
+    });
   };
 
   // Lấy email của người đăng nhập hiện tại và dữ liệu tour
@@ -108,44 +118,75 @@ export default function TourStart() {
 
 
   //Phần này code content được expanded ra ứng với từng ngày
-  const renderLocations = (dayKey) => (
-    <ScrollView>
-      {userTrips[0]?.tripData?.places_to_visit?.map((location, index) => (
-        <View key={`${dayKey}-location${index}`} style={styles.customBox}>
-          <Image source={{ uri: location.image_url }} style={styles.image} />
-          <View style={styles.contentWrapper}>
-            <View style={styles.headCA}>
-              <Text style={styles.locaName}>{location.placeName}</Text>
-              <View style={styles.IconWrapper}>
-                <Feather name="navigation" size={16} color="black" />
-                <TouchableOpacity onPress={() => handleIconToggle(`${dayKey}-location${index}`)}>
-                  <Feather
-                    name={iconToggles[`${dayKey}-location${index}`] ? "check" : "plus-circle"} 
-                    size={16}
-                    color={iconToggles[`${dayKey}-location${index}`] ? "#02954F" : "black"}
-                  />
-                </TouchableOpacity>
+  const renderLocations = (dayKey) => {
+    // Filter out locations already selected for other days
+    const filteredLocations = userTrips[0]?.tripData?.places_to_visit?.filter((location) => {
+      return !selectedLocations.some(
+        (item) => item.placeName === location.placeName && item.day !== dayKey
+      );
+    });
+  
+    // Sort locations: selected locations appear first
+    const sortedLocations = filteredLocations?.sort((a, b) => {
+      const isSelectedA = selectedLocations.some(
+        (item) => item.placeName === a.placeName && item.day === dayKey
+      );
+      const isSelectedB = selectedLocations.some(
+        (item) => item.placeName === b.placeName && item.day === dayKey
+      );
+      return isSelectedB - isSelectedA; // Place selected (true = 1) before non-selected (false = 0)
+    });
+  
+    return (
+      <ScrollView>
+        {sortedLocations?.map((location, index) => {
+          const isSelected = selectedLocations.some(
+            (item) => item.placeName === location.placeName && item.day === dayKey
+          );
+          return (
+            <View key={`${dayKey}-location${index}`} style={styles.customBox}>
+              <Image source={{ uri: location.image_url }} style={styles.image} />
+              <View style={styles.contentWrapper}>
+                <View style={styles.headCA}>
+                  <Text style={styles.locaName}>{location.placeName}</Text>
+                  <View style={styles.IconWrapper}>
+                    <Feather name="navigation" size={16} color="black" />
+                    <TouchableOpacity
+                      onPress={() => handleLocationToggle(dayKey, location)}
+                    >
+                      <Feather
+                        name={isSelected ? "check" : "plus-circle"}
+                        size={16}
+                        color={isSelected ? "#02954F" : "black"}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <Text style={styles.subText}>{location.details}</Text>
+                <View style={styles.ContentDetail}>
+                  <View style={styles.IconDetail}>
+                    <Feather name="clock" size={14} color="black" />
+                  </View>
+                  <Text style={styles.textDetail}>
+                    Thời gian tham quan: {location.best_time_to_visit}
+                  </Text>
+                </View>
+                <View style={styles.ContentDetail}>
+                  <Ionicons name="ticket-outline" size={15} color="black" />
+                  <Text style={styles.textDetail}>
+                    Giá vé: {location.ticket_price.toLocaleString()} đồng
+                  </Text>
+                </View>
               </View>
             </View>
-            <Text style={styles.subText}>{location.details}</Text>
-            <View style={styles.ContentDetail}>
-              <View style={styles.IconDetail}>
-              <Feather name="clock" size={14} color="black" />
-              </View>
-              <Text style={styles.textDetail}>Thời gian tham quan: {location.best_time_to_visit}</Text>
-            </View>
-            <View style={styles.ContentDetail}>
-              <Ionicons name="ticket-outline" size={15} color="black" />
-              <Text style={styles.textDetail}>Giá vé: {location.ticket_price.toLocaleString()} đồng</Text>
-            </View>
-          </View>
-        </View>
-      ))}
-    </ScrollView>
-  );
+          );
+        })}
+      </ScrollView>
+    );
+  };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={24} color="black" />
       </TouchableOpacity>
@@ -154,10 +195,11 @@ export default function TourStart() {
       </TouchableOpacity>
 
       {/* Code ở đây nhé nhưng mà phía trên có 2 cái thêm là renderLocation với AccorditionItem nha*/}
+
       <View style={styles.headTextContainer}>
         <Text style={styles.headText}>Cùng sắp xếp chuyến đi nào</Text>
       </View>
-    
+
       {dateRange.map((date, index) => {
         const formattedDate = new Date(date).toLocaleDateString('vi-VN'); // Convert to dd-mm-yyyy format
         return (
@@ -171,10 +213,20 @@ export default function TourStart() {
         );
       })}
 
-      <TouchableOpacity style={styles.SaveButton} onPress={() => router.push('/tourFinal')}>
+      <TouchableOpacity
+        style={styles.SaveButton}
+        onPress={async () => {
+          try {
+            await AsyncStorage.setItem('selectedLocations', JSON.stringify(selectedLocations));
+            router.push('/tourFinal');
+          } catch (error) {
+            console.error('Error storing selectedLocations:', error);
+          }
+        }}
+      >
         <Text style={styles.saveText}>Lưu</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -294,12 +346,10 @@ const styles = StyleSheet.create({
     marginTop:'0.6%'
   },
   SaveButton:{
-    position:'absolute',
-    marginTop:'200%',
-    marginLeft:'75%',
+    marginVertical:'10%',
+    marginLeft:'72%',
     backgroundColor:'#FFDF6B',
     borderRadius:15,
-    padding:4,
     width:85,
     height:30,
   },
