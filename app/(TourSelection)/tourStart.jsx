@@ -1,6 +1,6 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -9,7 +9,7 @@ import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 import Collapsible from 'react-native-collapsible';
-import { collection, getDocs, query, where, setDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, query, where, setDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../configs/FireBaseConfig';
 
 // Accordion component
@@ -49,6 +49,8 @@ export default function TourStart() {
   const [dateRange, setDateRange] = useState([]);
   const [docId, setDocId] = useState();
 
+  const { docIdForEdit } = useLocalSearchParams();
+
   useEffect(() => {
     const fetchUserEmail = async () => {
       try {
@@ -70,23 +72,34 @@ export default function TourStart() {
 
   useEffect(() => {
     const GetMyTrips = async () => {
-      if (!userEmail) return; // Ensure userEmail exists
       try {
-        const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
-        const querySnapshot = await getDocs(q);
-        const trips = [];
-        querySnapshot.forEach((doc) => {
-          trips.push(doc.data());
-        });
-        setUserTrips(trips);
-        setDocId(trips[0].ID);
+        if (docIdForEdit) {
+          // Use docIdForEdit to fetch the trip data
+          const tripDoc = await getDoc(doc(db, 'UserTrips', docIdForEdit));
+          if (tripDoc.exists()) {
+            setUserTrips([tripDoc.data()]);
+            setDocId(docIdForEdit);
+          } else {
+            console.error("No trip found for docId:", docIdForEdit);
+          }
+        } else if (userEmail) {
+          // Use userEmail to fetch the trips
+          const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
+          const querySnapshot = await getDocs(q);
+          const trips = [];
+          querySnapshot.forEach((doc) => {
+            trips.push(doc.data());
+          });
+          setUserTrips(trips);
+          setDocId(trips[0]?.ID);
+        }
       } catch (error) {
         console.error("Error fetching user trips:", error);
       }
     };
 
     GetMyTrips();
-  }, [userEmail]);
+  }, [userEmail, docIdForEdit]);
 
   useEffect(() => {
     if (userTrips.length > 0) {
@@ -106,7 +119,6 @@ export default function TourStart() {
     }
   }, [userTrips]);
 
-
   const [modalVisible, setModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState({ placeName: "", day_visit: "" });
 
@@ -114,55 +126,44 @@ export default function TourStart() {
     const existingSelection = selectedLocations.find(
       (selected) => selected.placeName === location.placeName
     );
-  
-    // console.log("existingSelection.day_visit:", existingSelection?.day_visit);
-  
+
     if (existingSelection) {
-      // Safely format the day as "Ngày 1", "Ngày 2", etc.
       let formattedDay = "Invalid Day";
       if (existingSelection.day_visit.startsWith("day")) {
-        const dayNumber = parseInt(existingSelection.day_visit.substring(3), 10); // Extract the number after "day"
+        const dayNumber = parseInt(existingSelection.day_visit.substring(3), 10);
         formattedDay = `Ngày ${dayNumber + 1}`;
       } else {
         console.error("Invalid day_visit format:", existingSelection.day_visit);
       }
-  
-      // Location is already selected on another day
+
       if (existingSelection.day_visit !== dayKey) {
         setModalContent({ placeName: location.placeName, day_visit: formattedDay });
         setModalVisible(true);
         return;
       }
-  
-      // Unselect location if it's selected by this accordion
+
       setSelectedLocations((prev) => {
-        const updated = prev.filter(
+        return prev.filter(
           (selected) =>
             !(selected.placeName === location.placeName && selected.day_visit === dayKey)
         );
-        // console.log("Updated selected locations after unselect:", updated);
-        return updated;
       });
     } else {
-      // Select the location and associate it with this accordion
       setSelectedLocations((prev) => {
-        const updated = [...prev, { ...location, day_visit: dayKey }];
-        // console.log("Updated selected locations after add:", updated);
-        return updated;
+        return [...prev, { ...location, day_visit: dayKey }];
       });
     }
   };
-  
+
   const renderLocations = (dayKey) => {
     return (
       <ScrollView>
         {userTrips[0]?.tripData?.places_to_visit?.map((location, index) => {
-          // Check if this location is selected by this accordion
           const selectedByThisAccordion = selectedLocations.some(
             (selected) =>
               selected.placeName === location.placeName && selected.day_visit === dayKey
           );
-  
+
           return (
             <View key={`${dayKey}-location${index}`} style={styles.customBox}>
               <Image source={{}} style={styles.image} />
@@ -226,54 +227,50 @@ export default function TourStart() {
         );
       })}
 
-    <TouchableOpacity
-      style={styles.SaveButton}
-      onPress={async () => {
-        try {
-          if (userTrips.length > 0) {
-            const trip = userTrips[0];
-            const updatedPlacesToVisit = trip.tripData.places_to_visit.map((place) => {
-              const matchedSelectedPlace = selectedLocations.find(
-                (selected) => selected.placeName === place.placeName
-              );
+      <TouchableOpacity
+        style={styles.SaveButton}
+        onPress={async () => {
+          try {
+            if (userTrips.length > 0) {
+              const trip = userTrips[0];
+              const updatedPlacesToVisit = trip.tripData.places_to_visit.map((place) => {
+                const matchedSelectedPlace = selectedLocations.find(
+                  (selected) => selected.placeName === place.placeName
+                );
 
-              // If `day_visit` in tripData is "None" and there is a selected location with a valid `day_visit`
-              if (place.day_visit === "None" && matchedSelectedPlace && matchedSelectedPlace.day_visit !== "None") {
+                if (place.day_visit === "None" && matchedSelectedPlace && matchedSelectedPlace.day_visit !== "None") {
+                  return {
+                    ...place,
+                    day_visit: matchedSelectedPlace.day_visit,
+                  };
+                }
+
                 return {
                   ...place,
-                  day_visit: matchedSelectedPlace.day_visit, // Bind the new `day_visit`
+                  day_visit: matchedSelectedPlace ? matchedSelectedPlace.day_visit : "None",
                 };
-              }
+              });
 
-              // If no matched place or day_visit in selected location is "None", set `day_visit` to "None"
-              return {
-                ...place,
-                day_visit: matchedSelectedPlace ? matchedSelectedPlace.day_visit : "None", // Set to "None" if no match
+              const updatedTripData = {
+                ...trip.tripData,
+                places_to_visit: updatedPlacesToVisit,
               };
-            });
 
-            // Prepare updated tripData
-            const updatedTripData = {
-              ...trip.tripData,
-              places_to_visit: updatedPlacesToVisit,
-            };
+              const tripRef = doc(db, "UserTrips", docId);
+              await setDoc(tripRef, { ...trip, tripData: updatedTripData });
 
-            // Save updated tripData to the database
-            const tripRef = doc(db, "UserTrips", docId); // Assuming `docId` is the document ID
-            await setDoc(tripRef, { ...trip, tripData: updatedTripData });
-
-            console.log("Trip data updated successfully!");
-            router.push('/tourFinal');
-          } else {
-            console.error("No trips found to update.");
+              console.log("Trip data updated successfully!");
+              router.push(docIdForEdit ? { pathname: '/tourFinal', params: { docIdForEdit } } : '/tourFinal');
+            } else {
+              console.error("No trips found to update.");
+            }
+          } catch (error) {
+            console.error("Error saving trip data:", error);
           }
-        } catch (error) {
-          console.error("Error saving trip data:", error);
-        }
-      }}
-    >
-      <Text style={styles.saveText}>Lưu</Text>
-    </TouchableOpacity>
+        }}
+      >
+        <Text style={styles.saveText}>Lưu</Text>
+      </TouchableOpacity>
 
       <Modal
         animationType="slide"

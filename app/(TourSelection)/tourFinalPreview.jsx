@@ -199,7 +199,7 @@ export default function TourFinalPreview() {
             router.replace({
               pathname: '/tourStart',
               params: {
-                docId: docId
+                docIdForEdit: docId
               }
             })
           }}
