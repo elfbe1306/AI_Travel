@@ -90,6 +90,8 @@ export default function Loading() {
         ID: docId
       });
 
+      await AsyncStorage.setItem('UsingDocId', docId); // Dùng sau
+
       console.log("Trip data stored successfully.");
       router.push('(TourSelection)');
     } catch (error) {

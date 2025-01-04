@@ -159,7 +159,10 @@ export default function TourTransport() {
         { merge: true } // merge ensures only updated fields are written, not the entire document
       );
       console.log("Trip data updated successfully in Firebase.");
-      router.push('/tourFinalPreview');
+      router.push({
+        pathname: '/tourFinalPreview',
+        params: docId
+      });
     } catch (error) {
       console.error("Error updating trip data in Firebase:", error);
     }

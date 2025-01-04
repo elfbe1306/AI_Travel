@@ -23,10 +23,6 @@ const ReviewSection = ({ icon, title, text, styles }) => (
 export default function TourFinalPreview() {
   const router = useRouter();
 
-  useEffect(() => {
-    console.log(SelectedTransport, lowerTotalEstimatedCost, upperTotalEstimatedCost);
-  }, [])
-
   const WhoTravel = 'Cùng gia đình';
   const StartDate = '2024-07-20';
   const EndDate = '2024-07-25';
