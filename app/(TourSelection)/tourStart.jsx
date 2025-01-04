@@ -9,7 +9,7 @@ import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 import Collapsible from 'react-native-collapsible';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, setDoc, doc } from 'firebase/firestore';
 import { db } from '../../configs/FireBaseConfig';
 
 // Accordion component
@@ -47,6 +47,7 @@ export default function TourStart() {
   const [userEmail, setUserEmail] = useState(null);
   const [userTrips, setUserTrips] = useState([]);
   const [dateRange, setDateRange] = useState([]);
+  const [docId, setDocId] = useState();
 
   useEffect(() => {
     const fetchUserEmail = async () => {
@@ -71,13 +72,14 @@ export default function TourStart() {
     const GetMyTrips = async () => {
       if (!userEmail) return; // Ensure userEmail exists
       try {
-        const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
+        const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail), where('Usable', '==', false));
         const querySnapshot = await getDocs(q);
         const trips = [];
         querySnapshot.forEach((doc) => {
           trips.push(doc.data());
         });
         setUserTrips(trips);
+        setDocId(trips[0].ID);
       } catch (error) {
         console.error("Error fetching user trips:", error);
       }
@@ -98,7 +100,7 @@ export default function TourStart() {
         .filter((location) => location.day_visit !== "None")
         .map((location) => ({
           ...location,
-          day: location.day_visit,
+          day_visit: location.day_visit,
         }));
       setSelectedLocations(preselectedLocations);
     }
@@ -106,7 +108,7 @@ export default function TourStart() {
 
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalContent, setModalContent] = useState({ placeName: "", day: "" });
+  const [modalContent, setModalContent] = useState({ placeName: "", day_visit: "" });
 
   const handleLocationToggle = (dayKey, location) => {
     const existingSelection = selectedLocations.find(
@@ -115,11 +117,11 @@ export default function TourStart() {
 
     if (existingSelection) {
       // Format the day as "Ngày 1", "Ngày 2", etc.
-      const formattedDay = `Ngày ${parseInt(existingSelection.day.replace("day", ""), 10) + 1}`;
+      const formattedDay = `Ngày ${parseInt(existingSelection.day_visit.replace("day_visit", ""), 10) + 1}`;
 
       // Location is already selected on another day
-      if (existingSelection.day !== dayKey) {
-        setModalContent({ placeName: location.placeName, day: formattedDay });
+      if (existingSelection.day_visit !== dayKey) {
+        setModalContent({ placeName: location.placeName, day_visit: formattedDay });
         setModalVisible(true);
         return;
       }
@@ -128,14 +130,14 @@ export default function TourStart() {
       setSelectedLocations((prev) =>
         prev.filter(
           (selected) =>
-            !(selected.placeName === location.placeName && selected.day === dayKey)
+            !(selected.placeName === location.placeName && selected.day_visit === dayKey)
         )
       );
     } else {
       // Select the location and associate it with this accordion
       setSelectedLocations((prev) => [
         ...prev,
-        { ...location, day: dayKey },
+        { ...location, day_visit: dayKey },
       ]);
     }
   };
@@ -147,7 +149,7 @@ export default function TourStart() {
           // Check if this location is selected by this accordion
           const selectedByThisAccordion = selectedLocations.some(
             (selected) =>
-              selected.placeName === location.placeName && selected.day === dayKey
+              selected.placeName === location.placeName && selected.day_visit === dayKey
           );
   
           return (
@@ -216,9 +218,54 @@ export default function TourStart() {
         );
       })}
 
-      <TouchableOpacity style={styles.SaveButton} onPress={() => { console.log(selectedLocations) }}>
-        <Text style={styles.saveText}>Lưu</Text>
-      </TouchableOpacity>
+    <TouchableOpacity
+      style={styles.SaveButton}
+      onPress={async () => {
+        try {
+          if (userTrips.length > 0) {
+            const trip = userTrips[0];
+            const updatedPlacesToVisit = trip.tripData.places_to_visit.map((place) => {
+              const matchedSelectedPlace = selectedLocations.find(
+                (selected) => selected.placeName === place.placeName
+              );
+
+              // If `day_visit` in tripData is "None" and there is a selected location with a valid `day_visit`
+              if (place.day_visit === "None" && matchedSelectedPlace && matchedSelectedPlace.day_visit !== "None") {
+                return {
+                  ...place,
+                  day_visit: matchedSelectedPlace.day_visit, // Bind the new `day_visit`
+                };
+              }
+
+              // If no matched place or day_visit in selected location is "None", set `day_visit` to "None"
+              return {
+                ...place,
+                day_visit: matchedSelectedPlace ? matchedSelectedPlace.day_visit : "None", // Set to "None" if no match
+              };
+            });
+
+            // Prepare updated tripData
+            const updatedTripData = {
+              ...trip.tripData,
+              places_to_visit: updatedPlacesToVisit,
+            };
+
+            // Save updated tripData to the database
+            const tripRef = doc(db, "UserTrips", docId); // Assuming `docId` is the document ID
+            await setDoc(tripRef, { ...trip, tripData: updatedTripData });
+
+            console.log("Trip data updated successfully!");
+            router.push('/tourFinal');
+          } else {
+            console.error("No trips found to update.");
+          }
+        } catch (error) {
+          console.error("Error saving trip data:", error);
+        }
+      }}
+    >
+      <Text style={styles.saveText}>Lưu</Text>
+    </TouchableOpacity>
 
       <Modal
         animationType="slide"
@@ -230,7 +277,7 @@ export default function TourStart() {
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Thông báo</Text>
             <Text style={styles.modalMessage}>
-              Địa điểm "{modalContent.placeName}" đã được chọn vào {modalContent.day}.
+              Địa điểm "{modalContent.placeName}" đã được chọn vào {modalContent.day_visit}.
             </Text>
             <TouchableOpacity
               style={styles.modalButton}
