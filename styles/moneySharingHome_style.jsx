@@ -129,7 +129,7 @@ export const styles = StyleSheet.create({
     input: {
       fontFamily: 'nunito',
       fontSize: 12,
-      
+      color: '#000000'
     },
 
     nameBox: {
