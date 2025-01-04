@@ -69,7 +69,7 @@ export default function MoneySharing() {
               onChangeText={setBillValue}
               value={billValue}
               placeholder="1.000.000"
-              placeholderTextColor="#F67700"
+              placeholderTextColor="#CED8E6"
               keyboardType="numeric"
             />
           </View>
@@ -125,7 +125,7 @@ export default function MoneySharing() {
                 onChangeText={setCategoryName}
                 value={categoryName}
                 placeholder="Vé xem phim"
-                placeholderTextColor="#F67700"
+                placeholderTextColor="#CED8E6"
               />
             </View>
           </View>
@@ -138,7 +138,7 @@ export default function MoneySharing() {
                 value={categoryValue}
                 placeholder="100.000"
                 keyboardType="numeric"
-                placeholderTextColor="#F67700"
+                placeholderTextColor="#CED8E6"
               />
             </View>
             <TouchableOpacity>

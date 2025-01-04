@@ -57,6 +57,68 @@ export const styles = StyleSheet.create({
       fontFamily: 'nunito-bold',
       color: '#0A6138'
     },
+
+    tableFrame: {
+      backgroundColor: '#EBF7D4',
+      borderRadius:10,
+      width: 370,
+      marginVertical:'5%',
+      shadowColor: '#000',  // Shadow color
+      shadowOffset: { width: 0, height: 4 },  
+      shadowOpacity: 0.25, 
+      shadowRadius: 6,   
+      justifyContent: 'center',  // Centers vertically
+      alignSelf:'center',
+      paddingBottom:'4%'
+    },
+
+    tableHeader: {
+      flexDirection:'row',
+      padding: 12,
+      backgroundColor: '#FFE68A',
+      borderBlockColor:'#0A6138',
+      borderWidth:1, 
+      marginTop:'4%',
+      marginHorizontal:'2%'
+    },
+
+    tableHeaderText1: {
+      fontFamily: 'nunito-bold',
+      fontSize: 10,
+      color:'#0A6138',
+      width:60,
+      paddingHorizontal:'2%',
+      textAlign:'center'
+    },
+
+    tableHeaderText2: {
+      fontFamily: 'nunito-bold',
+      fontSize: 10,
+      color:'#0A6138',
+      width:95,
+      textAlign:'center',
+      marginLeft:'3%'
+    },
+
+    tableContent: {
+      flexDirection:'row',
+      padding: 10,
+      borderBlockColor:'#0A6138', 
+      borderBottomWidth:1,
+      borderRightWidth:1,
+      borderLeftWidth:1,
+      marginHorizontal:'2%'
+    },
+
+    tableContentText: {
+      fontFamily: 'nunito-medium',
+      fontSize: 10,
+      color:'#000000',
+      width:60,
+      alignSelf:'center',
+      textAlign:'center'
+    },
+
     returnButton: {
         position: 'absolute',
         marginTop: '190%',
