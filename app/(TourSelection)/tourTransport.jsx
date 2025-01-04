@@ -17,7 +17,6 @@ export default function TourTransport() {
   const { lowerTotalEstimatedCost, upperTotalEstimatedCost } = useLocalSearchParams();
   const [userEmail, setUserEmail] = useState(null);
   const [userTrips, setUserTrips] = useState([]);
-  const [userSelectedTrips, setUserSelectedTrips] = useState([]);
   const [transportation, setTransportation] = useState([]);
   const [selectedTransport, setSelectedTransport] = useState(null);
   const [lowerCost, setLowerCost] = useState(parseInt(lowerTotalEstimatedCost) || 0);
@@ -44,43 +43,25 @@ export default function TourTransport() {
   }, []);
 
   useEffect(() => {
-    const fetchUserSelectedTrips = async () => {
-      try {
-        const userTrips = await AsyncStorage.getItem('selectedLocations');
-        if (userTrips) {
-          const parsedTrips = JSON.parse(userTrips);
-          setUserSelectedTrips(parsedTrips);
-          // console.log('Retrieved Trip Data:', parsedTrips);
-        } else {
-          console.error("User Trip not found in AsyncStorage.");
-        }
-      } catch (error) {
-        console.error("Error retrieving user trips:", error);
-      }
-    };
-
-    fetchUserSelectedTrips();
-  }, []);
-
-  useEffect(() => {
     const GetMyTrips = async () => {
       if (!userEmail) return;
-
+  
       const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
       const querySnapshot = await getDocs(q);
-
+  
       const trips = [];
       querySnapshot.forEach((doc) => {
         trips.push(doc.data());
       });
-
+  
       setUserTrips(trips);
-
+  
       if (trips.length > 0) {
         const transportationData = trips[0]?.tripData?.transportation;
         if (transportationData) {
           const mappedTransportation = Object.keys(transportationData).map((key) => {
             const transport = transportationData[key];
+            const isSelected = transport.isSelectedTransport || false; // Check if this transport is selected
             return {
               id: key,
               title: key === 'bus' ? 'Xe khách' : key === 'flight' ? 'Máy bay' : key === 'train' ? 'Tàu hỏa' : 'Tự lái',
@@ -90,43 +71,57 @@ export default function TourTransport() {
                     <Feather name="truck" size={24} color="black" />,
               details: transport.details || 'Tự lái phương tiện của bạn theo kế hoạch cá nhân.',
               price: key === 'bus' || key === 'flight' || key === 'train' ? transport.price : 0,
-              bookingUrl: transport.booking_url || '#',
+              bookingUrl: transport?.booking_url || '#',
+              isSelected, // Add the isSelected flag
             };
           });
-
-          if (!mappedTransportation.some((option) => option.id === 'self-drive')) {
-            mappedTransportation.push({
-              id: 'self-drive',
-              title: 'Tự lái',
-              icon: <Feather name="truck" size={24} color="black" />,
-              details: 'Tự lái phương tiện của bạn theo kế hoạch cá nhân.',
-              price: 0,
-              bookingUrl: '#',
-            });
+  
+          // Move self-drive to the end
+          const sortedTransportation = mappedTransportation.sort((a, b) => {
+            if (a.id === 'self-drive') return 1; // Push self-drive to the end
+            if (b.id === 'self-drive') return -1;
+            return 0; // Keep other items in their current order
+          });
+  
+          setTransportation(sortedTransportation);
+  
+          // Set initial selected transport
+          const selected = sortedTransportation.find((t) => t.isSelected);
+          if (selected) {
+            setSelectedTransport(selected.id);
           }
-
-          setTransportation(mappedTransportation);
         }
       }
-
+  
       setDocId(trips[0]?.ID);
     };
-
+  
     GetMyTrips();
   }, [userEmail]);
 
   const handleSelect = (id, price) => {
-    if (selectedTransport === id) {
-      // Unselect transport, subtract cost
-      setLowerCost(prevCost => prevCost - price);
-      setUpperCost(prevCost => prevCost - price);
-      setSelectedTransport(null);
-    } else {
-      // Select transport, add cost
-      setLowerCost(prevCost => prevCost + price);
-      setUpperCost(prevCost => prevCost + price);
-      setSelectedTransport(id);
-    }
+    setSelectedTransport((prevSelected) => {
+      if (prevSelected === id) {
+        // Unselect transport, subtract cost
+        setLowerCost((prevCost) => prevCost - price);
+        setUpperCost((prevCost) => prevCost - price);
+        return null; // Deselect transport
+      } else {
+        // Select new transport, add cost
+        // Subtract previous transport's cost if it's selected
+        if (prevSelected) {
+          const prevTransport = transportation.find((t) => t.id === prevSelected);
+          if (prevTransport) {
+            const prevPrice = prevTransport.price || 0;
+            setLowerCost((prevCost) => prevCost - prevPrice);
+            setUpperCost((prevCost) => prevCost - prevPrice);
+          }
+        }
+        setLowerCost((prevCost) => prevCost + price);
+        setUpperCost((prevCost) => prevCost + price);
+        return id; // Select new transport
+      }
+    });
   };
 
   const handleSaveTripData = async () => {
@@ -134,20 +129,6 @@ export default function TourTransport() {
       console.error("No trips found for the user.");
       return;
     }
-  
-    // Cập nhật places_to_visit
-    const updatedPlacesToVisit = userTrips[0]?.tripData?.places_to_visit.map((place) => {
-      const placeName = place?.placeName || ""; // Default to an empty string
-      const matchedPlace = userSelectedTrips.find(
-        (selected) => selected?.placeName === placeName
-      );
-  
-      // Include day only if matchedPlace is found
-      return {
-        ...place,
-        day: matchedPlace ? matchedPlace.day : null,
-      };
-    });
   
     // Cập nhật transportation
     const currentTransportation = userTrips[0]?.tripData?.transportation || {};
@@ -159,18 +140,7 @@ export default function TourTransport() {
       return acc;
     }, {});
   
-    // Nếu selectedTransport là "self-drive", thêm mục tự lái
-    if (selectedTransport === "self-drive") {
-      updatedTransportation["self-drive"] = {
-        details: "Tự lái phương tiện của bạn theo kế hoạch cá nhân.",
-        price: 0,
-        booking_url: "#",
-        isSelectedTransport: true,
-      };
-    }
-  
-    console.log("Updated Places to Visit:", updatedPlacesToVisit);
-    console.log("Updated Transportation:", updatedTransportation);
+    // console.log("Updated Transportation:", updatedTransportation);
   
     try {
       // Ensure you're targeting the correct trip using the document ID from userTrips
@@ -181,26 +151,19 @@ export default function TourTransport() {
         tripDocRef,
         {
           tripData: {
-            places_to_visit: updatedPlacesToVisit,
             transportation: updatedTransportation,
           },
+          lowerCost: lowerCost,
+          upperCost: upperCost
         },
         { merge: true } // merge ensures only updated fields are written, not the entire document
       );
       console.log("Trip data updated successfully in Firebase.");
+      router.push('/tourFinalPreview');
     } catch (error) {
       console.error("Error updating trip data in Firebase:", error);
     }
   };
-
-        // router.push({
-      //   pathname: "/tourFinalPreview",
-      //   params: {
-      //     SelectedTransport: selectedTransport,
-      //     lowerTotalEstimatedCost: lowerCost,
-      //     upperTotalEstimatedCost: upperCost,
-      //   },
-      // });
 
   return (
     <View style={styles.container}>
@@ -220,7 +183,7 @@ export default function TourTransport() {
                     {option.icon}
                     <Text style={styles.cardTitle}>{option.title}</Text>
                   </View>
-                  <TouchableOpacity onPress={() => handleSelect(option.id, option.price)}>
+                  <TouchableOpacity onPress={() => {handleSelect(option.id, option.price)}}>
                     <Feather
                       name={selectedTransport === option.id ? "check" : "plus-circle"}
                       size={16}

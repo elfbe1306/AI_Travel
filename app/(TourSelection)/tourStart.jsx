@@ -114,31 +114,42 @@ export default function TourStart() {
     const existingSelection = selectedLocations.find(
       (selected) => selected.placeName === location.placeName
     );
-
+  
+    // console.log("existingSelection.day_visit:", existingSelection?.day_visit);
+  
     if (existingSelection) {
-      // Format the day as "Ngày 1", "Ngày 2", etc.
-      const formattedDay = `Ngày ${parseInt(existingSelection.day_visit.replace("day_visit", ""), 10) + 1}`;
-
+      // Safely format the day as "Ngày 1", "Ngày 2", etc.
+      let formattedDay = "Invalid Day";
+      if (existingSelection.day_visit.startsWith("day")) {
+        const dayNumber = parseInt(existingSelection.day_visit.substring(3), 10); // Extract the number after "day"
+        formattedDay = `Ngày ${dayNumber + 1}`;
+      } else {
+        console.error("Invalid day_visit format:", existingSelection.day_visit);
+      }
+  
       // Location is already selected on another day
       if (existingSelection.day_visit !== dayKey) {
         setModalContent({ placeName: location.placeName, day_visit: formattedDay });
         setModalVisible(true);
         return;
       }
-
+  
       // Unselect location if it's selected by this accordion
-      setSelectedLocations((prev) =>
-        prev.filter(
+      setSelectedLocations((prev) => {
+        const updated = prev.filter(
           (selected) =>
             !(selected.placeName === location.placeName && selected.day_visit === dayKey)
-        )
-      );
+        );
+        // console.log("Updated selected locations after unselect:", updated);
+        return updated;
+      });
     } else {
       // Select the location and associate it with this accordion
-      setSelectedLocations((prev) => [
-        ...prev,
-        { ...location, day_visit: dayKey },
-      ]);
+      setSelectedLocations((prev) => {
+        const updated = [...prev, { ...location, day_visit: dayKey }];
+        // console.log("Updated selected locations after add:", updated);
+        return updated;
+      });
     }
   };
   

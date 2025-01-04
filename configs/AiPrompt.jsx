@@ -10,19 +10,24 @@ export const AI_PROMPT = `{
       "details": "",
       "price": ,
       "booking_url": "",
-      "isSelectedTransport": False
+      "isSelectedTransport": false
     },
     "train": {
       "details": "",
       "price": ,
       "booking_url": "",
-      "isSelectedTransport": False
+      "isSelectedTransport": false
     },
     "bus": {
       "details": "",
       "price": ,
       "booking_url": "",
-      "isSelectedTransport": False
+      "isSelectedTransport": false
+    },
+    "self-drive": {
+      "details": "Tự lái phương tiện của bạn theo kế hoạch cá nhân.",
+      "price": 0,
+      "isSelectedTransport": false
     }
   },
   "places_to_visit": [
