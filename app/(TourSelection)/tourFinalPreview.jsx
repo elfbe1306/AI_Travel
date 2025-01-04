@@ -184,10 +184,6 @@ export default function TourFinalPreview() {
 
   return (
     <ScrollView style={styles.container}>
-      <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
-        <Ionicons name="chevron-back" size={24} color="black" />
-      </TouchableOpacity>
-
       <Image
         source={require('../../assets/images/tourFinalPreviewHeroimage.png')}
         style={{ width: '100%', height: 250 }}
@@ -197,7 +193,17 @@ export default function TourFinalPreview() {
         <TouchableOpacity style={{ position: 'absolute', top: 17, right: 60 }}>
           <Feather name="share-2" size={20} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity style={{ position: 'absolute', top: 17, right: 20 }}>
+        <TouchableOpacity 
+          style={{ position: 'absolute', top: 17, right: 20 }}
+          onPress={() => {
+            router.replace({
+              pathname: '/tourStart',
+              params: {
+                docId: docId
+              }
+            })
+          }}
+        >
           <Feather name="edit-2" size={20} color="black" />
         </TouchableOpacity>
       </View>
@@ -274,14 +280,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFE68A',
-  },
-  returnButton: {
-    position: 'absolute',
-    marginTop: '15%',
-    marginLeft: '6%',
-    padding: 15,
-    backgroundColor: 'white',
-    borderRadius: 99,
   },
   reviewSchedule: {
     marginHorizontal: '3%',
