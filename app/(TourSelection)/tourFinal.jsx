@@ -73,7 +73,7 @@ export default function TourFinal() {
     const GetMyTrips = async () => {
       if (!userEmail) return; // Ensure userEmail exists
       try {
-        const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail), where('Usable', '==', false));
+        const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
         const querySnapshot = await getDocs(q);
         const trips = [];
         querySnapshot.forEach((doc) => {
@@ -185,7 +185,15 @@ export default function TourFinal() {
 
       <TouchableOpacity
         style={styles.ContinueButton}
-        onPress={() => {console.log(lowerTotalEstimatedCost, upperTotalEstimatedCost)}}
+        onPress={() => {
+          router.push({
+            pathname: '/tourTransport',
+            params: {
+              lowerTotalEstimatedCost: lowerTotalEstimatedCost,
+              upperTotalEstimatedCost: upperTotalEstimatedCost
+            }
+          })
+        }}
       >
         <Text style={styles.ContinueText}>Tiếp tục</Text>
       </TouchableOpacity>

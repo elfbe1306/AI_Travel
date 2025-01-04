@@ -87,7 +87,6 @@ export default function Loading() {
         MinBugget: MinBugget,
         MaxBugget: MaxBugget,
         Destination: Destination,
-        Usable: false,
         ID: docId
       });
 

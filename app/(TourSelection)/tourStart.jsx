@@ -72,7 +72,7 @@ export default function TourStart() {
     const GetMyTrips = async () => {
       if (!userEmail) return; // Ensure userEmail exists
       try {
-        const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail), where('Usable', '==', false));
+        const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
         const querySnapshot = await getDocs(q);
         const trips = [];
         querySnapshot.forEach((doc) => {
