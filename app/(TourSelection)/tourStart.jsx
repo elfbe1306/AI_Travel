@@ -12,17 +12,15 @@ import Collapsible from 'react-native-collapsible';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../configs/FireBaseConfig';
 
-
-// Accordion component - phần này là để chỉnh chung các Accordition - 1 Acordition là 1 ngày
+// Accordion component
 const AccordionItem = ({ title, expanded, toggleAccordion, renderContent }) => (
   <View style={styles.accordionItem}>
-    <View style={[styles.header, expanded && styles.headerExpanded]}> 
-      <Text style={[styles.title, expanded && styles.titleExpanded]}>{title}</Text> 
+    <View style={[styles.header, expanded && styles.headerExpanded]}>
+      <Text style={[styles.title, expanded && styles.titleExpanded]}>{title}</Text>
       <TouchableOpacity onPress={toggleAccordion}>
         <AntDesign name={expanded ? "caretdown" : "caretright"} size={20} color="#02954F" />
       </TouchableOpacity>
     </View>
-
     <Collapsible collapsed={!expanded}>
       <View style={styles.content}>{renderContent && renderContent()}</View>
     </Collapsible>
@@ -34,39 +32,21 @@ const getDateRange = (startDate, endDate) => {
   const end = new Date(endDate);
   const dateArray = [];
 
-  for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
-    dateArray.push(new Date(d).toISOString().split('T')[0]); // Get the date in yyyy-mm-dd format
+  while (start <= end) {
+    dateArray.push(new Date(start).toISOString().split('T')[0]);
+    start.setDate(start.getDate() + 1);
   }
 
   return dateArray;
 };
 
-// TourStart component
 export default function TourStart() {
   const router = useRouter();
-  const [expandedIndex, setExpandedIndex] = useState(null); //này dùng để tránh multiple expanded, chỉ cho phép 1 Accordition expand
-  const [selectedLocations, setSelectedLocations] = useState([]); // này và handleIconToggle dùng để chuyển từ nút "plus-circle" thành "check" khi bấm
-
-  const handleLocationToggle = (dayKey, location) => {
-    setSelectedLocations((prevState) => {
-      const exists = prevState.find(
-        (item) => item.placeName === location.placeName && item.day === dayKey
-      );
-      if (exists) {
-        // Remove the location if already selected for the given day
-        return prevState.filter(
-          (item) => !(item.placeName === location.placeName && item.day === dayKey)
-        );
-      } else {
-        // Add the location with its associated day
-        return [...prevState, { day: dayKey, ...location }];
-      }
-    });
-  };
-
-  // Lấy email của người đăng nhập hiện tại và dữ liệu tour
+  const [expandedIndex, setExpandedIndex] = useState(null);
+  const [selectedLocations, setSelectedLocations] = useState([]);
   const [userEmail, setUserEmail] = useState(null);
   const [userTrips, setUserTrips] = useState([]);
+  const [dateRange, setDateRange] = useState([]);
 
   useEffect(() => {
     const fetchUserEmail = async () => {
@@ -85,67 +65,91 @@ export default function TourStart() {
     };
 
     fetchUserEmail();
-
   }, []);
-  
+
   useEffect(() => {
     const GetMyTrips = async () => {
-      const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail))
-      const querySnapshot = await getDocs(q);
-  
-      querySnapshot.forEach((doc) => {
-        console.log(doc.id, ' => ', doc.data());
-        setUserTrips(prev => [...prev, doc.data()]);
-      });
-    }
+      if (!userEmail) return; // Ensure userEmail exists
+      try {
+        const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
+        const querySnapshot = await getDocs(q);
+        const trips = [];
+        querySnapshot.forEach((doc) => {
+          trips.push(doc.data());
+        });
+        setUserTrips(trips);
+      } catch (error) {
+        console.error("Error fetching user trips:", error);
+      }
+    };
 
     GetMyTrips();
-
-  }, [userEmail])
-
-
-  // Tính số ngày để render
-  const [dateRange, setDateRange] = useState([]);
+  }, [userEmail]);
 
   useEffect(() => {
     if (userTrips.length > 0) {
       const { StartDate, EndDate } = userTrips[0];
       const dates = getDateRange(StartDate, EndDate);
       setDateRange(dates);
-    }
 
+      // Preselect locations with day_visit
+      const allLocations = userTrips[0]?.tripData?.places_to_visit || [];
+      const preselectedLocations = allLocations
+        .filter((location) => location.day_visit !== "None")
+        .map((location) => ({
+          ...location,
+          day: location.day_visit,
+        }));
+      setSelectedLocations(preselectedLocations);
+    }
   }, [userTrips]);
 
-
-  //Phần này code content được expanded ra ứng với từng ngày
+  const handleLocationToggle = (dayKey, location) => {
+    const existingSelection = selectedLocations.find(
+      (selected) => selected.placeName === location.placeName
+    );
+  
+    if (existingSelection) {
+      // Format the day as "Ngày 1", "Ngày 2", etc.
+      const formattedDay = `Ngày ${parseInt(existingSelection.day.replace("day", ""), 10) + 1}`;
+  
+      // Location is already selected on another day
+      if (existingSelection.day !== dayKey) {
+        alert(
+          `Địa điểm "${location.placeName}" đã được chọn vào ${formattedDay}.`
+        );
+        return;
+      }
+  
+      // Unselect location if it's selected by this accordion
+      setSelectedLocations((prev) =>
+        prev.filter(
+          (selected) =>
+            !(selected.placeName === location.placeName && selected.day === dayKey)
+        )
+      );
+    } else {
+      // Select the location and associate it with this accordion
+      setSelectedLocations((prev) => [
+        ...prev,
+        { ...location, day: dayKey },
+      ]);
+    }
+  };
+  
   const renderLocations = (dayKey) => {
-    // Filter out locations already selected for other days
-    const filteredLocations = userTrips[0]?.tripData?.places_to_visit?.filter((location) => {
-      return !selectedLocations.some(
-        (item) => item.placeName === location.placeName && item.day !== dayKey
-      );
-    });
-  
-    // Sort locations: selected locations appear first
-    const sortedLocations = filteredLocations?.sort((a, b) => {
-      const isSelectedA = selectedLocations.some(
-        (item) => item.placeName === a.placeName && item.day === dayKey
-      );
-      const isSelectedB = selectedLocations.some(
-        (item) => item.placeName === b.placeName && item.day === dayKey
-      );
-      return isSelectedB - isSelectedA; // Place selected (true = 1) before non-selected (false = 0)
-    });
-  
     return (
       <ScrollView>
-        {sortedLocations?.map((location, index) => {
-          const isSelected = selectedLocations.some(
-            (item) => item.placeName === location.placeName && item.day === dayKey
+        {userTrips[0]?.tripData?.places_to_visit?.map((location, index) => {
+          // Check if this location is selected by this accordion
+          const selectedByThisAccordion = selectedLocations.some(
+            (selected) =>
+              selected.placeName === location.placeName && selected.day === dayKey
           );
+  
           return (
             <View key={`${dayKey}-location${index}`} style={styles.customBox}>
-              <Image source={require('../../assets/images/imageTourStart.png')} style={styles.image} />
+              <Image source={{}} style={styles.image} />
               <View style={styles.contentWrapper}>
                 <View style={styles.headCA}>
                   <Text style={styles.locaName}>{location.placeName}</Text>
@@ -155,18 +159,16 @@ export default function TourStart() {
                       onPress={() => handleLocationToggle(dayKey, location)}
                     >
                       <Feather
-                        name={isSelected ? "check" : "plus-circle"}
+                        name={selectedByThisAccordion ? "check" : "plus-circle"}
                         size={16}
-                        color={isSelected ? "#02954F" : "black"}
+                        color={selectedByThisAccordion ? "#02954F" : "black"}
                       />
                     </TouchableOpacity>
                   </View>
                 </View>
                 <Text style={styles.subText}>{location.details}</Text>
                 <View style={styles.ContentDetail}>
-                  <View style={styles.IconDetail}>
-                    <Feather name="clock" size={14} color="black" />
-                  </View>
+                  <Feather name="clock" size={14} color="black" />
                   <Text style={styles.textDetail}>
                     Thời gian tham quan: {location.best_time_to_visit}
                   </Text>
@@ -194,14 +196,12 @@ export default function TourStart() {
         <Feather name="chevron-right" size={24} color="black" />
       </TouchableOpacity>
 
-      {/* Code ở đây nhé nhưng mà phía trên có 2 cái thêm là renderLocation với AccorditionItem nha*/}
-
       <View style={styles.headTextContainer}>
         <Text style={styles.headText}>Cùng sắp xếp chuyến đi nào</Text>
       </View>
 
       {dateRange.map((date, index) => {
-        const formattedDate = new Date(date).toLocaleDateString('vi-VN'); // Convert to dd-mm-yyyy format
+        const formattedDate = new Date(date).toLocaleDateString('vi-VN');
         return (
           <AccordionItem
             key={`day${index}`}
@@ -213,17 +213,7 @@ export default function TourStart() {
         );
       })}
 
-      <TouchableOpacity
-        style={styles.SaveButton}
-        onPress={async () => {
-          try {
-            await AsyncStorage.setItem('selectedLocations', JSON.stringify(selectedLocations));
-            router.push('/tourFinal');
-          } catch (error) {
-            console.error('Error storing selectedLocations:', error);
-          }
-        }}
-      >
+      <TouchableOpacity style={styles.SaveButton} onPress={() => { console.log(selectedLocations) }}>
         <Text style={styles.saveText}>Lưu</Text>
       </TouchableOpacity>
     </ScrollView>
