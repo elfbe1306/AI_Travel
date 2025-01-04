@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
@@ -104,23 +104,26 @@ export default function TourStart() {
     }
   }, [userTrips]);
 
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState({ placeName: "", day: "" });
+
   const handleLocationToggle = (dayKey, location) => {
     const existingSelection = selectedLocations.find(
       (selected) => selected.placeName === location.placeName
     );
-  
+
     if (existingSelection) {
       // Format the day as "Ngày 1", "Ngày 2", etc.
       const formattedDay = `Ngày ${parseInt(existingSelection.day.replace("day", ""), 10) + 1}`;
-  
+
       // Location is already selected on another day
       if (existingSelection.day !== dayKey) {
-        alert(
-          `Địa điểm "${location.placeName}" đã được chọn vào ${formattedDay}.`
-        );
+        setModalContent({ placeName: location.placeName, day: formattedDay });
+        setModalVisible(true);
         return;
       }
-  
+
       // Unselect location if it's selected by this accordion
       setSelectedLocations((prev) =>
         prev.filter(
@@ -216,6 +219,29 @@ export default function TourStart() {
       <TouchableOpacity style={styles.SaveButton} onPress={() => { console.log(selectedLocations) }}>
         <Text style={styles.saveText}>Lưu</Text>
       </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Thông báo</Text>
+            <Text style={styles.modalMessage}>
+              Địa điểm "{modalContent.placeName}" đã được chọn vào {modalContent.day}.
+            </Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>Đóng</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </ScrollView>
   );
 }
@@ -351,4 +377,39 @@ const styles = StyleSheet.create({
     color:'#02954F',
   },
 
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalMessage: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  modalButton: {
+    backgroundColor: "#02954F",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  modalButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 })
