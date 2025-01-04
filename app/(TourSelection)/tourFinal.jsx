@@ -53,7 +53,7 @@ export default function TourFinal() {
         if (userTrips) {
           const parsedTrips = JSON.parse(userTrips);
           setUserSelectedTrips(parsedTrips);
-          // console.log('Retrieved Trip Data:', parsedTrips);
+          console.log('Retrieved Trip Data:', parsedTrips);
         } else {
           console.error("User Trip not found in AsyncStorage.");
         }

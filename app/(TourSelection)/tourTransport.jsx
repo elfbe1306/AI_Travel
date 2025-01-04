@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../configs/FireBaseConfig';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -17,10 +17,12 @@ export default function TourTransport() {
   const { lowerTotalEstimatedCost, upperTotalEstimatedCost } = useLocalSearchParams();
   const [userEmail, setUserEmail] = useState(null);
   const [userTrips, setUserTrips] = useState([]);
+  const [userSelectedTrips, setUserSelectedTrips] = useState([]);
   const [transportation, setTransportation] = useState([]);
   const [selectedTransport, setSelectedTransport] = useState(null);
   const [lowerCost, setLowerCost] = useState(parseInt(lowerTotalEstimatedCost) || 0);
   const [upperCost, setUpperCost] = useState(parseInt(upperTotalEstimatedCost) || 0);
+  const [docId, setDocId] = useState()
 
   useEffect(() => {
     const fetchUserEmail = async () => {
@@ -39,6 +41,25 @@ export default function TourTransport() {
     };
 
     fetchUserEmail();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserSelectedTrips = async () => {
+      try {
+        const userTrips = await AsyncStorage.getItem('selectedLocations');
+        if (userTrips) {
+          const parsedTrips = JSON.parse(userTrips);
+          setUserSelectedTrips(parsedTrips);
+          // console.log('Retrieved Trip Data:', parsedTrips);
+        } else {
+          console.error("User Trip not found in AsyncStorage.");
+        }
+      } catch (error) {
+        console.error("Error retrieving user trips:", error);
+      }
+    };
+
+    fetchUserSelectedTrips();
   }, []);
 
   useEffect(() => {
@@ -73,18 +94,22 @@ export default function TourTransport() {
             };
           });
 
-          mappedTransportation.push({
-            id: 'self-drive',
-            title: 'Tự lái',
-            icon: <Feather name="truck" size={24} color="black" />,
-            details: 'Tự lái phương tiện của bạn theo kế hoạch cá nhân.',
-            price: 0,
-            bookingUrl: '#',
-          });
+          if (!mappedTransportation.some((option) => option.id === 'self-drive')) {
+            mappedTransportation.push({
+              id: 'self-drive',
+              title: 'Tự lái',
+              icon: <Feather name="truck" size={24} color="black" />,
+              details: 'Tự lái phương tiện của bạn theo kế hoạch cá nhân.',
+              price: 0,
+              bookingUrl: '#',
+            });
+          }
 
           setTransportation(mappedTransportation);
         }
       }
+
+      setDocId(trips[0]?.ID);
     };
 
     GetMyTrips();
@@ -103,6 +128,79 @@ export default function TourTransport() {
       setSelectedTransport(id);
     }
   };
+
+  const handleSaveTripData = async () => {
+    if (!userTrips.length) {
+      console.error("No trips found for the user.");
+      return;
+    }
+  
+    // Cập nhật places_to_visit
+    const updatedPlacesToVisit = userTrips[0]?.tripData?.places_to_visit.map((place) => {
+      const placeName = place?.placeName || ""; // Default to an empty string
+      const matchedPlace = userSelectedTrips.find(
+        (selected) => selected?.placeName === placeName
+      );
+  
+      // Include day only if matchedPlace is found
+      return {
+        ...place,
+        day: matchedPlace ? matchedPlace.day : null,
+      };
+    });
+  
+    // Cập nhật transportation
+    const currentTransportation = userTrips[0]?.tripData?.transportation || {};
+    const updatedTransportation = Object.keys(currentTransportation).reduce((acc, key) => {
+      acc[key] = {
+        ...currentTransportation[key],
+        isSelectedTransport: key === selectedTransport, // Chỉ set true cho phương tiện được chọn
+      };
+      return acc;
+    }, {});
+  
+    // Nếu selectedTransport là "self-drive", thêm mục tự lái
+    if (selectedTransport === "self-drive") {
+      updatedTransportation["self-drive"] = {
+        details: "Tự lái phương tiện của bạn theo kế hoạch cá nhân.",
+        price: 0,
+        booking_url: "#",
+        isSelectedTransport: true,
+      };
+    }
+  
+    console.log("Updated Places to Visit:", updatedPlacesToVisit);
+    console.log("Updated Transportation:", updatedTransportation);
+  
+    try {
+      // Ensure you're targeting the correct trip using the document ID from userTrips
+      const tripDocRef = doc(db, "UserTrips", docId);
+  
+      // Use setDoc to replace the entire document, with a merge option to only update the relevant fields
+      await setDoc(
+        tripDocRef,
+        {
+          tripData: {
+            places_to_visit: updatedPlacesToVisit,
+            transportation: updatedTransportation,
+          },
+        },
+        { merge: true } // merge ensures only updated fields are written, not the entire document
+      );
+      console.log("Trip data updated successfully in Firebase.");
+    } catch (error) {
+      console.error("Error updating trip data in Firebase:", error);
+    }
+  };
+
+        // router.push({
+      //   pathname: "/tourFinalPreview",
+      //   params: {
+      //     SelectedTransport: selectedTransport,
+      //     lowerTotalEstimatedCost: lowerCost,
+      //     upperTotalEstimatedCost: upperCost,
+      //   },
+      // });
 
   return (
     <View style={styles.container}>
@@ -155,16 +253,7 @@ export default function TourTransport() {
         </View>
       </ScrollView>
 
-      <TouchableOpacity style={styles.continueButton} onPress={() => 
-        router.push({
-          pathname: '/tourFinalPreview',
-          params: {
-            SelectedTransport: selectedTransport,
-            lowerTotalEstimatedCost: lowerCost,
-            upperTotalEstimatedCost: upperCost
-          }
-        })
-      }>
+      <TouchableOpacity style={styles.continueButton} onPress={handleSaveTripData}>
         <Text style={styles.continueButtonText}>Lưu</Text>
       </TouchableOpacity>
     </View>

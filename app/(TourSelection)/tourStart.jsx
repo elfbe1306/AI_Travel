@@ -12,12 +12,11 @@ import Collapsible from 'react-native-collapsible';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../configs/FireBaseConfig';
 
-
-// Accordion component - phần này là để chỉnh chung các Accordition - 1 Acordition là 1 ngày
+// Accordion component
 const AccordionItem = ({ title, expanded, toggleAccordion, renderContent }) => (
   <View style={styles.accordionItem}>
     <View style={[styles.header, expanded && styles.headerExpanded]}> 
-      <Text style={[styles.title, expanded && styles.titleExpanded]}>{title}</Text> 
+      <Text style={[styles.title, expanded && styles.titleExpanded]}>{title}</Text>
       <TouchableOpacity onPress={toggleAccordion}>
         <AntDesign name={expanded ? "caretdown" : "caretright"} size={20} color="#02954F" />
       </TouchableOpacity>
@@ -44,8 +43,11 @@ const getDateRange = (startDate, endDate) => {
 // TourStart component
 export default function TourStart() {
   const router = useRouter();
-  const [expandedIndex, setExpandedIndex] = useState(null); //này dùng để tránh multiple expanded, chỉ cho phép 1 Accordition expand
-  const [selectedLocations, setSelectedLocations] = useState([]); // này và handleIconToggle dùng để chuyển từ nút "plus-circle" thành "check" khi bấm
+  const [expandedIndex, setExpandedIndex] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
+  const [userTrips, setUserTrips] = useState([]);
+  const [dateRange, setDateRange] = useState([]);
+  const [selectedLocations, setSelectedLocations] = useState([]);
 
   const handleLocationToggle = (dayKey, location) => {
     setSelectedLocations((prevState) => {
@@ -59,15 +61,12 @@ export default function TourStart() {
         );
       } else {
         // Add the location with its associated day
-        return [...prevState, { day: dayKey, ...location }];
+        return [...prevState, {day_visit: dayKey, day: dayKey, ...location }];
       }
     });
   };
 
-  // Lấy email của người đăng nhập hiện tại và dữ liệu tour
-  const [userEmail, setUserEmail] = useState(null);
-  const [userTrips, setUserTrips] = useState([]);
-
+  // Fetch user email from AsyncStorage
   useEffect(() => {
     const fetchUserEmail = async () => {
       try {
@@ -75,7 +74,6 @@ export default function TourStart() {
         if (userSession) {
           const { email } = JSON.parse(userSession);
           setUserEmail(email);
-          console.log("Retrieved User Email:", email);
         } else {
           console.error("User session not found in AsyncStorage.");
         }
@@ -85,41 +83,40 @@ export default function TourStart() {
     };
 
     fetchUserEmail();
-
   }, []);
-  
+
+  // Fetch user trips from Firestore
   useEffect(() => {
     const GetMyTrips = async () => {
-      const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail))
-      const querySnapshot = await getDocs(q);
-  
-      querySnapshot.forEach((doc) => {
-        console.log(doc.id, ' => ', doc.data());
-        setUserTrips(prev => [...prev, doc.data()]);
-      });
-    }
+      if (userEmail) {
+        const q = query(
+          collection(db, 'UserTrips'),
+          where('userEmail', '==', userEmail),
+          where('Usable', '==', false)
+        );
+        const querySnapshot = await getDocs(q);
+        const trips = [];
+        querySnapshot.forEach((doc) => {
+          trips.push(doc.data());
+        });
+        setUserTrips(trips);
+      }
+    };
 
     GetMyTrips();
+  }, [userEmail]);
 
-  }, [userEmail])
-
-
-  // Tính số ngày để render
-  const [dateRange, setDateRange] = useState([]);
-
+  // Calculate date range for rendering
   useEffect(() => {
     if (userTrips.length > 0) {
       const { StartDate, EndDate } = userTrips[0];
       const dates = getDateRange(StartDate, EndDate);
       setDateRange(dates);
     }
-
   }, [userTrips]);
 
-
-  //Phần này code content được expanded ra ứng với từng ngày
+  // Render locations for each day
   const renderLocations = (dayKey) => {
-    // Filter out locations already selected for other days
     const filteredLocations = userTrips[0]?.tripData?.places_to_visit?.filter((location) => {
       return !selectedLocations.some(
         (item) => item.placeName === location.placeName && item.day !== dayKey
@@ -136,23 +133,25 @@ export default function TourStart() {
       );
       return isSelectedB - isSelectedA; // Place selected (true = 1) before non-selected (false = 0)
     });
-  
+
     return (
       <ScrollView>
         {sortedLocations?.map((location, index) => {
           const isSelected = selectedLocations.some(
             (item) => item.placeName === location.placeName && item.day === dayKey
           );
+
           return (
             <View key={`${dayKey}-location${index}`} style={styles.customBox}>
-              <Image source={require('../../assets/images/imageTourStart.png')} style={styles.image} />
+              <Image source={{}} style={styles.image} />
               <View style={styles.contentWrapper}>
                 <View style={styles.headCA}>
                   <Text style={styles.locaName}>{location.placeName}</Text>
                   <View style={styles.IconWrapper}>
                     <Feather name="navigation" size={16} color="black" />
-                    <TouchableOpacity
-                      onPress={() => handleLocationToggle(dayKey, location)}
+                    <TouchableOpacity onPress={() => {
+                        handleLocationToggle(dayKey, location)
+                      }}
                     >
                       <Feather
                         name={isSelected ? "check" : "plus-circle"}
@@ -194,14 +193,12 @@ export default function TourStart() {
         <Feather name="chevron-right" size={24} color="black" />
       </TouchableOpacity>
 
-      {/* Code ở đây nhé nhưng mà phía trên có 2 cái thêm là renderLocation với AccorditionItem nha*/}
-
       <View style={styles.headTextContainer}>
         <Text style={styles.headText}>Cùng sắp xếp chuyến đi nào</Text>
       </View>
 
       {dateRange.map((date, index) => {
-        const formattedDate = new Date(date).toLocaleDateString('vi-VN'); // Convert to dd-mm-yyyy format
+        const formattedDate = new Date(date).toLocaleDateString('vi-VN');
         return (
           <AccordionItem
             key={`day${index}`}
@@ -213,22 +210,13 @@ export default function TourStart() {
         );
       })}
 
-      <TouchableOpacity
-        style={styles.SaveButton}
-        onPress={async () => {
-          try {
-            await AsyncStorage.setItem('selectedLocations', JSON.stringify(selectedLocations));
-            router.push('/tourFinal');
-          } catch (error) {
-            console.error('Error storing selectedLocations:', error);
-          }
-        }}
-      >
+      <TouchableOpacity style={styles.SaveButton} onPress={() => {}}>
         <Text style={styles.saveText}>Lưu</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
