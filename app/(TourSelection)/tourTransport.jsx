@@ -89,6 +89,8 @@ export default function TourTransport() {
           const selected = sortedTransportation.find((t) => t.isSelected);
           if (selected) {
             setSelectedTransport(selected.id);
+            setLowerCost((prevCost) => prevCost + selected.price); // Add the selected transport's price
+            setUpperCost((prevCost) => prevCost + selected.price); // Add the selected transport's price
           }
         }
       }
@@ -161,7 +163,7 @@ export default function TourTransport() {
       console.log("Trip data updated successfully in Firebase.");
       router.push({
         pathname: '/tourFinalPreview',
-        params: docId
+        params: {docId : docId}
       });
     } catch (error) {
       console.error("Error updating trip data in Firebase:", error);
