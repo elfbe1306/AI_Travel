@@ -1,15 +1,15 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
 import Collapsible from 'react-native-collapsible';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where} from 'firebase/firestore';
 import { db } from '../../configs/FireBaseConfig';
 
 const AccordionItem = ({ title, expanded, toggleAccordion, renderContent }) => (
@@ -32,8 +32,9 @@ const getDateRange = (startDate, endDate) => {
   const end = new Date(endDate);
   const dateArray = [];
 
-  for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
-    dateArray.push(new Date(d).toISOString().split('T')[0]);
+  while (start <= end) {
+    dateArray.push(new Date(start).toISOString().split('T')[0]);
+    start.setDate(start.getDate() + 1);
   }
 
   return dateArray;
@@ -41,32 +42,13 @@ const getDateRange = (startDate, endDate) => {
 
 export default function TourFinal() {
   const router = useRouter();
-  const [userSelectedTrips, setUserSelectedTrips] = useState([]);
+  const [selectedLocations, setSelectedLocations] = useState([]);
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [lowerTotalEstimatedCost, setLowerTotalEstimatedCost] = useState(0);
   const [upperTotalEstimatedCost, setUpperTotalEstimatedCost] = useState(0);
-
-  useEffect(() => {
-    const fetchUserSelectedTrips = async () => {
-      try {
-        const userTrips = await AsyncStorage.getItem('selectedLocations');
-        if (userTrips) {
-          const parsedTrips = JSON.parse(userTrips);
-          setUserSelectedTrips(parsedTrips);
-          console.log('Retrieved Trip Data:', parsedTrips);
-        } else {
-          console.error("User Trip not found in AsyncStorage.");
-        }
-      } catch (error) {
-        console.error("Error retrieving user trips:", error);
-      }
-    };
-
-    fetchUserSelectedTrips();
-  }, []);
-
   const [userEmail, setUserEmail] = useState(null);
   const [userTrips, setUserTrips] = useState([]);
+  const [dateRange, setDateRange] = useState([]);
 
   useEffect(() => {
     const fetchUserEmail = async () => {
@@ -89,35 +71,47 @@ export default function TourFinal() {
 
   useEffect(() => {
     const GetMyTrips = async () => {
-      if (!userEmail) return;
-      const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
-      const querySnapshot = await getDocs(q);
-
-      querySnapshot.forEach((doc) => {
-        // console.log(doc.id, ' => ', doc.data());
-        setUserTrips((prev) => [...prev, doc.data()]);
-      });
+      if (!userEmail) return; // Ensure userEmail exists
+      try {
+        const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail), where('Usable', '==', false));
+        const querySnapshot = await getDocs(q);
+        const trips = [];
+        querySnapshot.forEach((doc) => {
+          trips.push(doc.data());
+        });
+        setUserTrips(trips);
+      } catch (error) {
+        console.error("Error fetching user trips:", error);
+      }
     };
 
     GetMyTrips();
   }, [userEmail]);
-
-  const [dateRange, setDateRange] = useState([]);
 
   useEffect(() => {
     if (userTrips.length > 0) {
       const { StartDate, EndDate } = userTrips[0];
       const dates = getDateRange(StartDate, EndDate);
       setDateRange(dates);
+
+      // Preselect locations with day_visit
+      const allLocations = userTrips[0]?.tripData?.places_to_visit || [];
+      const preselectedLocations = allLocations
+        .filter((location) => location.day_visit !== "None")
+        .map((location) => ({
+          ...location,
+          day_visit: location.day_visit,
+        }));
+      setSelectedLocations(preselectedLocations);
     }
   }, [userTrips]);
 
   useEffect(() => {
-    if (userSelectedTrips.length > 0) {
+    if (selectedLocations.length > 0) {
       let lowerCost = 0;
       let upperCost = 0;
   
-      userSelectedTrips.forEach((location) => {
+      selectedLocations.forEach((location) => {
         if (location.ticket_price) {
           lowerCost += location.ticket_price;
           upperCost += location.ticket_price;    
@@ -127,10 +121,10 @@ export default function TourFinal() {
       setLowerTotalEstimatedCost(lowerCost);
       setUpperTotalEstimatedCost(upperCost);
     }
-  }, [userSelectedTrips]);
+  }, [selectedLocations]);
 
   const renderLocations = (dayKey) => {
-    const matchedLocations = userSelectedTrips.filter((location) => location.day === dayKey);
+    const matchedLocations = selectedLocations.filter((location) => location.day_visit === dayKey);
 
     if (!matchedLocations || matchedLocations.length === 0) {
       return <Text style={styles.noLocationsText}>Bạn không có lịch trình trong ngày hôm nay</Text>;
@@ -191,20 +185,7 @@ export default function TourFinal() {
 
       <TouchableOpacity
         style={styles.ContinueButton}
-        onPress={async () => {
-          try {
-            await AsyncStorage.setItem('selectedLocations', JSON.stringify(userSelectedTrips));
-            router.push({
-              pathname: '/tourTransport', 
-              params: {
-                lowerTotalEstimatedCost: lowerTotalEstimatedCost,
-                upperTotalEstimatedCost: upperTotalEstimatedCost
-              }
-            });
-          } catch (error) {
-            console.error('Error storing user selected trips:', error);
-          }
-        }}
+        onPress={() => {console.log(lowerTotalEstimatedCost, upperTotalEstimatedCost)}}
       >
         <Text style={styles.ContinueText}>Tiếp tục</Text>
       </TouchableOpacity>
