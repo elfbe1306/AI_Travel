@@ -117,30 +117,40 @@ export default function TourStart() {
 
   // Render locations for each day
   const renderLocations = (dayKey) => {
-    const filteredLocations = userTrips[0]?.tripData?.places_to_visit?.filter((location) => {
-      return !selectedLocations.some(
-        (item) => item.placeName === location.placeName && item.day !== dayKey
-      );
+    const allLocations = userTrips[0]?.tripData?.places_to_visit || [];
+  
+    // Filter locations based on dayKey
+    const filteredLocations = allLocations.filter((location) => {
+      if (location.day_visit === dayKey) {
+        // Show the location if explicitly assigned to the current day
+        return true;
+      }
+      if (location.day_visit === "None") {
+        // Show unassigned locations only if they are not selected for another day
+        return !selectedLocations.some((item) => item.placeName === location.placeName);
+      }
+      // Exclude locations assigned to other days
+      return false;
     });
   
-    // Sort locations: selected locations appear first
-    const sortedLocations = filteredLocations?.sort((a, b) => {
-      const isSelectedA = selectedLocations.some(
-        (item) => item.placeName === a.placeName && item.day === dayKey
-      );
-      const isSelectedB = selectedLocations.some(
-        (item) => item.placeName === b.placeName && item.day === dayKey
-      );
+    // Sort locations: selected locations for the current day appear first
+    const sortedLocations = filteredLocations.sort((a, b) => {
+      const isSelectedA =
+        selectedLocations.some((item) => item.placeName === a.placeName && item.day === dayKey) ||
+        a.day_visit === dayKey;
+      const isSelectedB =
+        selectedLocations.some((item) => item.placeName === b.placeName && item.day === dayKey) ||
+        b.day_visit === dayKey;
       return isSelectedB - isSelectedA; // Place selected (true = 1) before non-selected (false = 0)
     });
-
+  
     return (
       <ScrollView>
-        {sortedLocations?.map((location, index) => {
-          const isSelected = selectedLocations.some(
-            (item) => item.placeName === location.placeName && item.day === dayKey
-          );
-
+        {sortedLocations.map((location, index) => {
+          const isSelected =
+            selectedLocations.some((item) => item.placeName === location.placeName && item.day === dayKey) ||
+            location.day_visit === dayKey;
+  
           return (
             <View key={`${dayKey}-location${index}`} style={styles.customBox}>
               <Image source={{}} style={styles.image} />
@@ -149,8 +159,9 @@ export default function TourStart() {
                   <Text style={styles.locaName}>{location.placeName}</Text>
                   <View style={styles.IconWrapper}>
                     <Feather name="navigation" size={16} color="black" />
-                    <TouchableOpacity onPress={() => {
-                        handleLocationToggle(dayKey, location)
+                    <TouchableOpacity
+                      onPress={() => {
+                        handleLocationToggle(dayKey, location);
                       }}
                     >
                       <Feather
@@ -183,6 +194,7 @@ export default function TourStart() {
       </ScrollView>
     );
   };
+  
 
   return (
     <ScrollView style={styles.container}>
