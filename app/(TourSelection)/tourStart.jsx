@@ -208,9 +208,6 @@ export default function TourStart() {
       <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={24} color="black" />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.nextButton} onPress={() => router.push('/tourFinal')}>
-        <Feather name="chevron-right" size={24} color="black" />
-      </TouchableOpacity>
 
       <View style={styles.headTextContainer}>
         <Text style={styles.headText}>Cùng sắp xếp chuyến đi nào</Text>
