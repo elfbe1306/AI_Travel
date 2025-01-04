@@ -126,14 +126,14 @@ export default function TourStart() {
       );
     });
   
-    // Sort locations: selected locations for the current day appear first
-    const sortedLocations = filteredLocations.sort((a, b) => {
-      const isSelectedA =
-        selectedLocations.some((item) => item.placeName === a.placeName && item.day === dayKey) ||
-        a.day_visit === dayKey;
-      const isSelectedB =
-        selectedLocations.some((item) => item.placeName === b.placeName && item.day === dayKey) ||
-        b.day_visit === dayKey;
+    // Sort locations: selected locations appear first
+    const sortedLocations = filteredLocations?.sort((a, b) => {
+      const isSelectedA = selectedLocations.some(
+        (item) => item.placeName === a.placeName && item.day === dayKey
+      );
+      const isSelectedB = selectedLocations.some(
+        (item) => item.placeName === b.placeName && item.day === dayKey
+      );
       return isSelectedB - isSelectedA; // Place selected (true = 1) before non-selected (false = 0)
     });
   
@@ -184,7 +184,6 @@ export default function TourStart() {
       </ScrollView>
     );
   };
-  
 
   return (
     <ScrollView style={styles.container}>
