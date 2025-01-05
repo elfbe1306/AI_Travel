@@ -27,6 +27,13 @@ const AccordionItem = ({ title, expanded, toggleAccordion, renderContent }) => (
   </View>
 );
 
+
+const GetPhotoRef = async () => {
+  const resp = await fetch('https://maps.googleapis.com/maps/api/place/textsearch/json?query=restaurants%20in%20Sydney&key=AIzaSyCuTOmB0GB8tHgUZNazM8xeKLxGkkiN9OY')
+  const result = await resp.json();
+  console.log(result);
+}
+
 const getDateRange = (startDate, endDate) => {
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -68,6 +75,7 @@ export default function TourStart() {
     };
 
     fetchUserEmail();
+    // GetPhotoRef('Nha Trang');
   }, []);
 
   useEffect(() => {
@@ -166,7 +174,12 @@ export default function TourStart() {
 
           return (
             <View key={`${dayKey}-location${index}`} style={styles.customBox}>
-              <Image source={{}} style={styles.image} />
+              <Image 
+                style={styles.image}
+                source={{
+                  uri: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${location.placeName}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`,
+                }}
+              />
               <View style={styles.contentWrapper}>
                 <View style={styles.headCA}>
                   <Text style={styles.locaName}>{location.placeName}</Text>

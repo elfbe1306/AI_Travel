@@ -196,7 +196,7 @@ export default function TourFinalPreview() {
         <TouchableOpacity 
           style={{ position: 'absolute', top: 17, right: 20 }}
           onPress={() => {
-            router.replace({
+            router.push({
               pathname: '/tourStart',
               params: {
                 docIdForEdit: docId

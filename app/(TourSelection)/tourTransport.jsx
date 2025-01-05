@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { collection, getDocs, query, where, doc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../configs/FireBaseConfig';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -14,7 +14,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function TourTransport() {
   const router = useRouter();
-  const { lowerTotalEstimatedCost, upperTotalEstimatedCost } = useLocalSearchParams();
+  const { lowerTotalEstimatedCost, upperTotalEstimatedCost, docIdForEdit, } = useLocalSearchParams();
   const [userEmail, setUserEmail] = useState(null);
   const [userTrips, setUserTrips] = useState([]);
   const [transportation, setTransportation] = useState([]);
@@ -44,62 +44,84 @@ export default function TourTransport() {
 
   useEffect(() => {
     const GetMyTrips = async () => {
-      if (!userEmail) return;
+      try {
+        let trips = [];
+        if (docIdForEdit) {
+          const tripDoc = await getDoc(doc(db, 'UserTrips', docIdForEdit));
+          if (tripDoc.exists()) {
+            trips = [tripDoc.data()];
+            setDocId(docIdForEdit);
+          } else {
+            console.error("No trip found for docId:", docIdForEdit);
+          }
+        } else if (userEmail) {
+          const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
+          const querySnapshot = await getDocs(q);
+          trips = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+          if (trips.length > 0) {
+            setDocId(trips[0]?.id);
+          }
+        }
   
-      const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
-      const querySnapshot = await getDocs(q);
+        setUserTrips(trips);
   
-      const trips = [];
-      querySnapshot.forEach((doc) => {
-        trips.push(doc.data());
-      });
-  
-      setUserTrips(trips);
-  
-      if (trips.length > 0) {
-        const transportationData = trips[0]?.tripData?.transportation;
-        if (transportationData) {
+        if (trips.length > 0) {
+          const transportationData = trips[0]?.tripData?.transportation || {};
           const mappedTransportation = Object.keys(transportationData).map((key) => {
             const transport = transportationData[key];
-            const isSelected = transport.isSelectedTransport || false; // Check if this transport is selected
+            const isSelected = transport.isSelectedTransport || false;
             return {
               id: key,
               title: key === 'bus' ? 'Xe khách' : key === 'flight' ? 'Máy bay' : key === 'train' ? 'Tàu hỏa' : 'Tự lái',
-              icon: key === 'bus' ? <MaterialIcons name="directions-bus" size={24} color="black" /> :
-                    key === 'flight' ? <MaterialCommunityIcons name="airplane" size={26} color="black" /> :
-                    key === 'train' ? <FontAwesome5 name="train" size={24} color="black" /> :
-                    <Feather name="truck" size={24} color="black" />,
+              icon: key === 'bus' ? (
+                <MaterialIcons name="directions-bus" size={24} color="black" />
+              ) : key === 'flight' ? (
+                <MaterialCommunityIcons name="airplane" size={26} color="black" />
+              ) : key === 'train' ? (
+                <FontAwesome5 name="train" size={24} color="black" />
+              ) : (
+                <Feather name="truck" size={24} color="black" />
+              ),
               details: transport.details || 'Tự lái phương tiện của bạn theo kế hoạch cá nhân.',
-              price: key === 'bus' || key === 'flight' || key === 'train' ? transport.price : 0,
-              bookingUrl: transport?.booking_url || '#',
-              isSelected, // Add the isSelected flag
+              price: transport.price || 0,
+              bookingUrl: transport.booking_url || '#',
+              isSelected,
             };
           });
   
-          // Move self-drive to the end
           const sortedTransportation = mappedTransportation.sort((a, b) => {
-            if (a.id === 'self-drive') return 1; // Push self-drive to the end
+            if (a.id === 'self-drive') return 1;
             if (b.id === 'self-drive') return -1;
-            return 0; // Keep other items in their current order
+            return 0;
           });
   
           setTransportation(sortedTransportation);
   
-          // Set initial selected transport
           const selected = sortedTransportation.find((t) => t.isSelected);
-          if (selected) {
-            setSelectedTransport(selected.id);
-            setLowerCost((prevCost) => prevCost + selected.price); // Add the selected transport's price
-            setUpperCost((prevCost) => prevCost + selected.price); // Add the selected transport's price
-          }
-        }
-      }
+          let initialLowerCost = parseInt(lowerTotalEstimatedCost) || 0;
+          let initialUpperCost = parseInt(upperTotalEstimatedCost) || 0;
   
-      setDocId(trips[0]?.ID);
+          if (selected) {
+            initialLowerCost += selected.price;
+            initialUpperCost += selected.price;
+            setSelectedTransport(selected.id);
+          }
+  
+          // Set initial costs
+          setLowerCost(initialLowerCost);
+          setUpperCost(initialUpperCost);
+  
+          // console.log("Initialized Costs:", initialLowerCost, initialUpperCost);
+        }
+      } catch (error) {
+        console.error("Error fetching user trips:", error);
+      }
     };
   
-    GetMyTrips();
-  }, [userEmail]);
+    if (userEmail || docIdForEdit) {
+      GetMyTrips();
+    }
+  }, [userEmail, docIdForEdit]);
 
   const handleSelect = (id, price) => {
     setSelectedTransport((prevSelected) => {

@@ -1,6 +1,6 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView} from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors } from '../../constants/Colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -9,7 +9,7 @@ import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 import Collapsible from 'react-native-collapsible';
-import { collection, getDocs, query, where} from 'firebase/firestore';
+import { collection, getDocs, query, where, getDoc, doc} from 'firebase/firestore';
 import { db } from '../../configs/FireBaseConfig';
 
 const AccordionItem = ({ title, expanded, toggleAccordion, renderContent }) => (
@@ -50,6 +50,8 @@ export default function TourFinal() {
   const [userTrips, setUserTrips] = useState([]);
   const [dateRange, setDateRange] = useState([]);
 
+  const { docIdForEdit } = useLocalSearchParams();
+
   useEffect(() => {
     const fetchUserEmail = async () => {
       try {
@@ -71,22 +73,32 @@ export default function TourFinal() {
 
   useEffect(() => {
     const GetMyTrips = async () => {
-      if (!userEmail) return; // Ensure userEmail exists
       try {
-        const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
-        const querySnapshot = await getDocs(q);
-        const trips = [];
-        querySnapshot.forEach((doc) => {
-          trips.push(doc.data());
-        });
-        setUserTrips(trips);
+        if (docIdForEdit) {
+          // Use docIdForEdit to fetch the trip data
+          const tripDoc = await getDoc(doc(db, 'UserTrips', docIdForEdit));
+          if (tripDoc.exists()) {
+            setUserTrips([tripDoc.data()]);
+          } else {
+            console.error("No trip found for docId:", docIdForEdit);
+          }
+        } else if (userEmail) {
+          // Use userEmail to fetch the trips
+          const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
+          const querySnapshot = await getDocs(q);
+          const trips = [];
+          querySnapshot.forEach((doc) => {
+            trips.push(doc.data());
+          });
+          setUserTrips(trips);
+        }
       } catch (error) {
         console.error("Error fetching user trips:", error);
       }
     };
 
     GetMyTrips();
-  }, [userEmail]);
+  }, [userEmail, docIdForEdit]);
 
   useEffect(() => {
     if (userTrips.length > 0) {
@@ -186,13 +198,19 @@ export default function TourFinal() {
       <TouchableOpacity
         style={styles.ContinueButton}
         onPress={() => {
-          router.push({
+          router.push(docIdForEdit ? {
+            pathname: '/tourTransport',
+            params: {
+              lowerTotalEstimatedCost: lowerTotalEstimatedCost,
+              upperTotalEstimatedCost: upperTotalEstimatedCost,
+              docIdForEdit: docIdForEdit,
+            }
+          } : {
             pathname: '/tourTransport',
             params: {
               lowerTotalEstimatedCost: lowerTotalEstimatedCost,
               upperTotalEstimatedCost: upperTotalEstimatedCost
-            }
-          })
+            }})
         }}
       >
         <Text style={styles.ContinueText}>Tiếp tục</Text>
