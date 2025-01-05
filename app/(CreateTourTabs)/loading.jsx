@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { AI_PROMPT } from '../../configs/AiPrompt';
@@ -57,61 +57,103 @@ export default function Loading() {
   }, [Destination, days, nights, MinBugget, MaxBugget, WhoTravel, userEmail]);
 
   const generateAiTrip = async () => {
-    if (!userEmail) {
-      console.error("User email not available. Cannot generate trip.");
-      return;
-    }
+    // if (!userEmail) {
+    //   console.error("User email not available. Cannot generate trip.");
+    //   return;
+    // }
 
-    setLoading(true);
-    const FINAL_PROMPT = AI_PROMPT
-      .replace('{Destination}', Destination)
-      .replace('{days}', days)
-      .replace('{nights}', nights)
-      .replace('{MinBugget}', MinBugget)
-      .replace('{MaxBugget}', MaxBugget)
-      .replace('{WhoTravel}', WhoTravel);
+    // setLoading(true);
+    // const FINAL_PROMPT = AI_PROMPT
+    //   .replace('{Destination}', Destination)
+    //   .replace('{days}', days)
+    //   .replace('{nights}', nights)
+    //   .replace('{MinBugget}', MinBugget)
+    //   .replace('{MaxBugget}', MaxBugget)
+    //   .replace('{WhoTravel}', WhoTravel);
 
-    console.log(FINAL_PROMPT);
+    // console.log(FINAL_PROMPT);
 
-    try {
-      const result = await chatSession.sendMessage(FINAL_PROMPT);
-      const tripResponse = JSON.parse(result.response.text());
+    // try {
+    //   const result = await chatSession.sendMessage(FINAL_PROMPT);
+    //   const tripResponse = JSON.parse(result.response.text());
 
-      const docId = Date.now().toString();
-      await setDoc(doc(db, "UserTrips", docId), {
-        userEmail,
-        tripData: tripResponse,
-      });
+    //   const docId = Date.now().toString();
+    //   await setDoc(doc(db, "UserTrips", docId), {
+    //     userEmail,
+    //     tripData: tripResponse,
+    //     WhoTravel: WhoTravel,
+    //     StartDate: StartDate,
+    //     EndDate: EndDate,
+    //     MinBugget: MinBugget,
+    //     MaxBugget: MaxBugget,
+    //     Destination: Destination,
+    //     ID: docId
+    //   });
 
-      console.log("Trip data stored successfully.");
-      router.push('(TourSelection)');
-    } catch (error) {
-      console.error("Error storing trip data:", error);
-    } finally {
-      setLoading(false);
-    }
+    //   await AsyncStorage.setItem('UsingDocId', docId); // Dùng sau
+
+    //   console.log("Trip data stored successfully.");
+    //   router.push({
+    //     pathname: '/tourStart',
+    //     params: {docIdForEdit: docId}
+    //   })
+    // } catch (error) {
+    //   console.error("Error storing trip data:", error);
+    // } finally {
+    //   setLoading(false);
+    // }
+
+    router.push({
+      pathname: '/tourStart',
+      params: {docIdForEdit: 1736083677326}
+    })
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={24} color="black" />
       </TouchableOpacity>
 
-      <Text style={{ marginTop: '50%' }}>
-        {WhoTravel}, {StartDate}, {EndDate}, {MinBugget}, {MaxBugget}, {Destination}
-      </Text>
+      <View style={styles.loadingContainer}>
+        <Image
+          source = {require('../../assets/images/loadingAnimation.gif')} // Replace with your desired loading image URL
+          style={styles.loadingImage}
+        />
+        <Text style={styles.loadingText}>Đang tạo chuyến đi của bạn...</Text>
+      </View>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   returnButton: {
     position: 'absolute',
-    marginTop: '15%',
-    marginLeft: '6%',
+    top: '10%',
+    left: '6%',
     padding: 15,
     backgroundColor: 'white',
     borderRadius: 99,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: 'gray',
+    textAlign: 'center',
   },
 });

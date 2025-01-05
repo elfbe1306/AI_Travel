@@ -43,9 +43,9 @@ const TabBar = ({ state, descriptors, navigation }) => {
           if (route.name === 'tourCreate') {
             router.push('/(CreateTourTabs)'); // Use router for the custom route
           }
-          else if(route.name === 'mytrip') {
-            router.push('/(TourSelection)'); // Để tạm thời để testing có gì fix lại sau
-          } 
+          // else if(route.name === 'mytrip') {
+          //   router.push('/(TourSelection)'); // Để tạm thời để testing có gì fix lại sau
+          // } 
           else if(route.name === 'shareMoney') {
             router.push('/(MoneySharing)');
           }

@@ -14,7 +14,7 @@ export default function Home() {
             <View style={styles.imageBox}>
               <Image source={require('../../assets/images/character.png')} style={styles.userImage}/>
             </View>
-            <Text style={styles.userName}>Doan Le Vy</Text>
+            <Text style={styles.userName}>Doan Le Vy </Text>
           </View>
 
           <View style={styles.notificationButton}>
