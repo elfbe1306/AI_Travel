@@ -1,5 +1,8 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet, Dimensions } from 'react-native'
 import { Colors } from '../constants/Colors'
+
+const GAP = Dimensions.get('window').width - 300;
+
 
 export const styles = StyleSheet.create({
     headerContainer: {
@@ -9,13 +12,10 @@ export const styles = StyleSheet.create({
       flex: 6.5
     },
     firstHeaderContainer: {
-      position: 'absolute',
+      gap: GAP,
       marginTop: '15%',
-      justifyContent:'space-between=',
-      alignItems: 'center',
-      alignContent: 'center',
-      gap: '25%',
       flexDirection:'row',
+      
     },
     userNameBox: {
       backgroundColor: 'white',
@@ -25,6 +25,7 @@ export const styles = StyleSheet.create({
       borderRadius: 40,
       marginLeft: '5%',
       flexDirection:'row',
+      width: 200,
     },
     imageBox: {
       backgroundColor: 'pink', 
@@ -36,18 +37,22 @@ export const styles = StyleSheet.create({
       width: 50, 
       height: 75,
     },
+
     userName: {
       marginTop: 16,
-      marginLeft: 15,
-      fontFamily: 'nunito-bold'
+      marginLeft: 10,
+      fontFamily: 'nunito-bold',
+      textAlign:'center'
     },
+
     notificationButton: {
       padding: 15,
       backgroundColor: 'white',
-      borderRadius: 99
+      borderRadius: 99,
     },
+
     secondHeaderContainer: {
-      marginTop: '40%',
+      marginTop: '15%',
       marginLeft: '5%'
     },
     secondHeaderContainerTitleText: {

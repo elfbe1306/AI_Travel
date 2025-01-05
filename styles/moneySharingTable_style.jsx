@@ -1,7 +1,7 @@
 import { StyleSheet, Dimensions } from 'react-native'
 import { Colors } from '../constants/Colors'
 
-const GAP = Dimensions.get('window').width - 320;
+const GAP = Dimensions.get('window').width - 300;
 const FRAMEGAP = Dimensions.get('window').width - 315;
 
 export const styles = StyleSheet.create({
@@ -24,7 +24,7 @@ export const styles = StyleSheet.create({
       borderRadius: 40,
       marginLeft: '5%',
       flexDirection:'row',
-      width: 220,
+      width: 200,
     },
     imageBox: {
       backgroundColor: 'pink', 
@@ -74,7 +74,8 @@ export const styles = StyleSheet.create({
 
     tableHeader: {
       flexDirection:'row',
-      padding: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 12,
       backgroundColor: '#FFE68A',
       borderBlockColor:'#0A6138',
       borderWidth:1, 
@@ -87,7 +88,7 @@ export const styles = StyleSheet.create({
       fontSize: 10,
       color:'#0A6138',
       width:60,
-      paddingHorizontal:'2%',
+      paddingRight:'2%',
       textAlign:'center'
     },
 
@@ -114,25 +115,58 @@ export const styles = StyleSheet.create({
       fontFamily: 'nunito-medium',
       fontSize: 10,
       color:'#000000',
-      width:60,
+      width:55,
+      marginRight:'2%',
       alignSelf:'center',
       textAlign:'center'
     },
 
+    collapsibleContainer: {
+      flex: 1,
+      marginVertical: 4, 
+    },
+    
+    collapsibleIcon: {
+      marginLeft: '5%', 
+      width: 68,
+      paddingLeft:'90%'
+    },
+
+    participantBox: {
+      marginTop: 8, 
+      backgroundColor: '#A1D599', 
+      borderRadius: 6, 
+      width:62,
+      height: 52,
+      marginRight:'8%',
+      alignSelf:'flex-end'
+    },
+    
     returnButton: {
-        position: 'absolute',
-        marginTop: '190%',
-        marginLeft: '6%',
-        padding: 15,
-        backgroundColor: 'white',
-        borderRadius: 99,
+        backgroundColor: '#FFE68A',
+        marginLeft: '12%',
+        width: 75,
+        height:30,
+        borderRadius: 16,
       },
+      
+      Footer: {
+        flexDirection:'row'
+      },
+
       nextButton: {
-        position: 'absolute',
-        marginTop: '190%',
-        marginLeft: '80%',
-        padding: 15,
-        backgroundColor: 'white',
-        borderRadius: 99,
-      }
+        backgroundColor: '#FFE68A',
+        marginLeft: '42%',
+        width: 75,
+        height:30,
+        borderRadius: 16,
+      },
+  
+      nextButtonText: {
+        color: '#0A6138',
+        fontSize: 10,
+        fontFamily: 'nunito-bold',
+        textAlign:'center',
+        paddingVertical:'10%'
+      },
   });

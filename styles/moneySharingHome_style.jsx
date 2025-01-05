@@ -1,7 +1,7 @@
 import { StyleSheet, Dimensions } from 'react-native'
 import { Colors } from '../constants/Colors'
 
-const GAP = Dimensions.get('window').width - 320;
+const GAP = Dimensions.get('window').width - 300;
 const FRAMEGAP = Dimensions.get('window').width - 318;
 
 export const styles = StyleSheet.create({
@@ -24,7 +24,7 @@ export const styles = StyleSheet.create({
       borderRadius: 40,
       marginLeft: '5%',
       flexDirection:'row',
-      width: 220,
+      width: 200,
     },
     imageBox: {
       backgroundColor: 'pink', 
