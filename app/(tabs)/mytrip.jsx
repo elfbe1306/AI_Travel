@@ -11,7 +11,7 @@ export default function MyTrip() {
         onPress={() => {
           router.push({
             pathname: '/tourStart',
-            params: {docIdForEdit: 1736017684142}
+            params: {docIdForEdit: 1736083677326}
           })
         }}
       >

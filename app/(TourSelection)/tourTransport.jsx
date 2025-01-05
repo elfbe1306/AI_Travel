@@ -193,7 +193,7 @@ export default function TourTransport() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={24} color="black" />
       </TouchableOpacity>
@@ -246,7 +246,7 @@ export default function TourTransport() {
       <TouchableOpacity style={styles.continueButton} onPress={handleSaveTripData}>
         <Text style={styles.continueButtonText}>Lưu</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -281,7 +281,6 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     marginHorizontal: '5%',
-    marginTop: '5%',
     backgroundColor: '#A1D59963',
     borderRadius: 15,
     padding: 10,
@@ -329,6 +328,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     textDecorationSkipInk: 'none',
     textUnderlinePosition: 'from-font',
+    maxWidth:'90%',
   },
   iconTextContainer: {
     flexDirection: 'row',
@@ -343,25 +343,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
     alignSelf: 'flex-end',
-    marginTop: 10,
+
   },
   buttonText: {
-    color: 'white',
+    color: '#FFE68A',
     fontFamily: 'nunito-bold',
     fontSize: 12,
   },
   continueButton: {
-    paddingVertical: 7,
-    paddingHorizontal: 0,
-    backgroundColor: '#02954F',
+    padding:5,
+    backgroundColor: '#FFDF6B',
     borderRadius: 30,
-    marginLeft: '65%',
-    marginRight: '6%',
-    marginTop: '5%'
+    marginLeft: '72%',
+    marginRight: '10%',
+    marginTop: '2%',
+    width:85,
+    height:30,
+    
   },
   continueButtonText: {
     textAlign: 'center',
     fontFamily: 'nunito-bold',
-    color: '#E8F2D4'
+    color: '#02954F'
   }
 });

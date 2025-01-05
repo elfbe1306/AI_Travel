@@ -258,7 +258,7 @@ export default function TourFinalPreview() {
       <View style={styles.reviewSchedule}>
         <Feather name="map" size={24} color="black" />
         <Text style={styles.reviewScheduleTitle}>Lịch trình</Text>
-
+        </View>
         {dateRange.map((date, index) => {
           const formattedDate = new Date(date).toLocaleDateString('vi-VN');
           return (
@@ -271,7 +271,7 @@ export default function TourFinalPreview() {
             />
           );
         })}
-      </View>
+      
     </ScrollView>
   );
 }
@@ -285,12 +285,17 @@ const styles = StyleSheet.create({
     marginHorizontal: '3%',
     alignItems: 'center',
     marginTop: '3%',
-    marginBottom: '5%'
+    flexDirection:'row',
+    
   },
   reviewScheduleTitle: {
-    fontFamily: 'nunito-bold',
-    fontSize: 18,
-    marginLeft: 10
+    fontFamily: 'nunito',
+    fontSize: 14,
+    marginLeft: 10,
+    lineHeight: 20,
+    letterSpacing: 0.5,
+    marginLeft: 12,
+  
   }
   ,
   common: {
@@ -324,7 +329,7 @@ const styles = StyleSheet.create({
     },
   },
   accordionItem: {
-    marginTop:'8%',
+    marginTop:'5%',
     marginLeft:'6%',
     marginRight:'6%',
     borderRadius:20,
@@ -404,8 +409,15 @@ const styles = StyleSheet.create({
     fontFamily:'nunito',
     fontSize:13,
     fontWeight:400,
+    maxWidth:'97%',
   },
   IconDetail:{
     marginTop:'0.6%'
   },
+  noLocationsText: {
+    textAlign: 'center',
+    fontFamily: 'nunito',
+    height: 25,
+    fontSize: 13
+  }
 });
