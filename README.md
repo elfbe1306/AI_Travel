@@ -28,7 +28,7 @@ Clone hoặc tải về từ repository này
   ```bash
     npm run start
    ```
-  ## Các công nghệ sử dụng:
+## Các công nghệ sử dụng:
   + Front-end: React Native
   + Back-end: JavaScript
   + Database: Google Firebase
