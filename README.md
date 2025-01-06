@@ -1,50 +1,41 @@
-# Welcome to your Expo app 👋
-
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
-
-## Get started
-
-1. Install dependencies
-
+# AI Travel
+AI Travel là ứng dụng nhằm giúp người dùng giải quyết những vấn đề thường gặp trong việc lên kế hoạch du lịch tự túc. Người dùng có thể lên kế hoạch du lịch dễ dàng và phân chia chi phí các hoạt động chung với những người cùng tham gia chuyến đi. 
+## Các chức năng của ứng dụng
++ Tạo một kế hoạch du lịch như mong muốn bao gồm:
+  + Chọn người mà người dùng muốn đi du lịch cùng.
+  + Chọn thời gian dự định đi du lịch.
+  + Xác định khoảng chi phí dự trù.
+  + Chọn nơi người dùng muốn đến (tỉnh thành, quốc gia).
+  + Hệ thống đề xuất các địa điểm du lịch tại nơi bạn muốn đến (bao gồm hình ảnh, mô tả ngắn, thời gian hoạt động, chi phí tham quan).
+  + Người dùng chọn nhiều địa điểm du lịch dự định theo ngày.
+  + Hệ thống đề xuất các phương tiện di chuyển (bao gồm mô tả ngắn, giá vé và đường link tới trang web đặt vé).
+  + Người dùng chọn phương tiện di chuyển theo ý muốn.
+  + Người dùng xem được toàn bộ thông tin về các kế hoạch du lịch đã tạo.
++ Người dùng có thế chia sẻ kế hoạch du lịch đã tạo cho bạn bè thông qua mã code.
++ Người dùng có thể tạo bảng phân chia chi phí theo từng mục với những người du lịch cùng.
++ Người dùng có thể sửa lại các thông tin trong kế hoạch khi có nhu cầu.
+## Cài đặt
+Clone hoặc tải về từ repository này
+  ```c
+  git clone https://github.com/elfbe1306/AI_Travel
+  ```
+## Khởi động ứng dụng
++ Tải các package cần thiết:
    ```bash
    npm install
    ```
-
-2. Start the app
-
-   ```bash
-    npx expo start
++ Khởi động ứng dụng
+  ```bash
+    npm run start
    ```
+  ## Các công nghệ sử dụng:
+  + Front-end: React Native
+  + Back-end: JavaScript
+  + Database: Google Firebase
+  + Công cụ hỗ trợ: AI Gemini
+  ## Các thành viên tham gia
+  + [Huỳnh Ngọc Nhơn](https://github.com/elfbe)
+  + [Trần Trung Kiên](https://github.com/kienntheprfs)
+  + [Phó Ngọc Song Khuê](https://github.com/SongKhuee)
+  + [Đoàn Lê Vy](https://github.com/jun28th)
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
