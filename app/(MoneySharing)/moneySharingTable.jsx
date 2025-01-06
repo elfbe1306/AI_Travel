@@ -112,7 +112,7 @@ export default function MoneySharingTable() {
           onPress={() => router.push('/moneySharingFinal')}
           style={styles.nextButton}>
           <Text style={styles.nextButtonText}>
-            Tiếp tục
+            Lưu
           </Text>
         </TouchableOpacity>
       </View>

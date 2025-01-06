@@ -148,6 +148,11 @@ export const styles = StyleSheet.create({
         width: 75,
         height:30,
         borderRadius: 16,
+        borderWidth:0.5,
+        borderColor:'#DCD7D7',
+        shadowColor: '#000',  // Shadow color
+        shadowOffset: { width: 0, height: 2},  
+        shadowOpacity: 0.5, 
       },
       
       Footer: {
@@ -160,6 +165,11 @@ export const styles = StyleSheet.create({
         width: 75,
         height:30,
         borderRadius: 16,
+        borderWidth:0.5,
+        borderColor:'#DCD7D7',
+        shadowColor: '#000',  // Shadow color
+        shadowOffset: { width: 0, height: 2},  
+        shadowOpacity: 0.5, 
       },
   
       nextButtonText: {

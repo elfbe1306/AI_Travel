@@ -1,6 +1,8 @@
-import { View, Text, TouchableOpacity, Image, TextInput, Alert, FlatList, Button } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Image, TextInput, Alert, FlatList, Button} from 'react-native';
+import React, { useState} from 'react';
+import {AsyncStorage} from 'react-native';
 import { useRouter } from 'expo-router';
+
 import { Colors } from '../../constants/Colors';
 import { styles } from '../../styles/moneySharingHome_style';
 
@@ -36,6 +38,17 @@ export default function MoneySharing() {
     const updatedParticipants = [...participants];
     updatedParticipants[index].isEditing = false;
     setParticipants(updatedParticipants);
+  };
+
+  const _storeData = async () => {
+    try {
+      await AsyncStorage.setItem('@billValue', billValue);
+      await AsyncStorage.setItem('@categoryName', categoryName);
+      await AsyncStorage.setItem('@categoryValue', categoryValue);
+      console.log('Data saved successfully');
+    } catch (error) {
+      console.log('Error saving data', error);
+    }
   };
 
   return (
@@ -149,7 +162,9 @@ export default function MoneySharing() {
       </View>
       <View>
       <TouchableOpacity
-        onPress={() => router.push('/moneySharingTable')}
+        onPress={() => {
+          _storeData();
+          router.push('/moneySharingTable')}}
         style={styles.nextButton}>
         <Text style={styles.nextButtonText}>
           Tiếp tục
