@@ -198,7 +198,9 @@ export default function TourStart() {
                 </View>
                 <Text style={styles.subText}>{location.details}</Text>
                 <View style={styles.ContentDetail}>
+                  <View style={styles.IconDetail}>
                   <Feather name="clock" size={14} color="black" />
+                  </View>
                   <Text style={styles.textDetail}>
                     Thời gian tham quan: {location.best_time_to_visit}
                   </Text>
@@ -422,6 +424,7 @@ const styles = StyleSheet.create({
     fontFamily:'nunito',
     fontSize:13,
     fontWeight:400,
+    maxWidth:'97%',
   },
   IconDetail:{
     marginTop:'0.6%'
@@ -440,6 +443,7 @@ const styles = StyleSheet.create({
     fontWeight:600,
     fontSize:16,
     color:'#02954F',
+    padding:3,
   },
 
 

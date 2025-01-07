@@ -330,6 +330,7 @@ const styles = StyleSheet.create({
     fontFamily:'nunito',
     fontSize:13,
     fontWeight:400,
+    maxWidth:'97%',
   },
   IconDetail:{
     marginTop:'0.6%'
@@ -348,6 +349,7 @@ const styles = StyleSheet.create({
     fontWeight:600,
     fontSize:16,
     color:'#02954F',
+    padding:3,
   },
   noLocationsText: {
     textAlign: 'center',
