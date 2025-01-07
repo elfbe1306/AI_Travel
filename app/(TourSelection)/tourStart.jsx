@@ -28,8 +28,8 @@ const AccordionItem = ({ title, expanded, toggleAccordion, renderContent }) => (
 );
 
 
-const GetPhotoRef = async () => {
-  const resp = await fetch('https://maps.googleapis.com/maps/api/place/textsearch/json?query=restaurants%20in%20Sydney&key=AIzaSyCuTOmB0GB8tHgUZNazM8xeKLxGkkiN9OY')
+const GetPhotoRef = async (PlaceName) => {
+  const resp = await fetch('https://maps.googleapis.com/maps/api/place/textsearch/json?query='+PlaceName+'&key='+process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY)
   const result = await resp.json();
   console.log(result);
 }
@@ -75,7 +75,7 @@ export default function TourStart() {
     };
 
     fetchUserEmail();
-    // GetPhotoRef('Nha Trang');
+    GetPhotoRef('Nha Trang');
   }, []);
 
   useEffect(() => {
