@@ -27,7 +27,6 @@ const AccordionItem = ({ title, expanded, toggleAccordion, renderContent }) => (
   </View>
 );
 
-
 const GetPhotoRef = async (PlaceName) => {
   try {
     const resp = await fetch(
@@ -58,31 +57,11 @@ export default function TourStart() {
   const router = useRouter();
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [selectedLocations, setSelectedLocations] = useState([]);
-  const [userEmail, setUserEmail] = useState(null);
   const [userTrips, setUserTrips] = useState([]);
   const [dateRange, setDateRange] = useState([]);
   const [docId, setDocId] = useState();
 
   const { docIdForEdit } = useLocalSearchParams();
-
-  useEffect(() => {
-    const fetchUserEmail = async () => {
-      try {
-        const userSession = await AsyncStorage.getItem('userSession');
-        if (userSession) {
-          const { email } = JSON.parse(userSession);
-          setUserEmail(email);
-          console.log("Retrieved User Email:", email);
-        } else {
-          console.error("User session not found in AsyncStorage.");
-        }
-      } catch (error) {
-        console.error("Error retrieving user session:", error);
-      }
-    };
-
-    fetchUserEmail();
-  }, []);
 
   useEffect(() => {
     const GetMyTrips = async () => {
@@ -96,16 +75,6 @@ export default function TourStart() {
           } else {
             console.error("No trip found for docId:", docIdForEdit);
           }
-        } else if (userEmail) {
-          // Use userEmail to fetch the trips
-          const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
-          const querySnapshot = await getDocs(q);
-          const trips = [];
-          querySnapshot.forEach((doc) => {
-            trips.push(doc.data());
-          });
-          setUserTrips(trips);
-          setDocId(trips[0]?.ID);
         }
       } catch (error) {
         console.error("Error fetching user trips:", error);
@@ -113,7 +82,7 @@ export default function TourStart() {
     };
 
     GetMyTrips();
-  }, [userEmail, docIdForEdit]);
+  }, [docIdForEdit]);
 
   useEffect(() => {
     if (userTrips.length > 0) {

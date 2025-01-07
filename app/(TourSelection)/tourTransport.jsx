@@ -14,33 +14,13 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function TourTransport() {
   const router = useRouter();
-  const { lowerTotalEstimatedCost, upperTotalEstimatedCost, docIdForEdit, } = useLocalSearchParams();
-  const [userEmail, setUserEmail] = useState(null);
+  const { lowerTotalEstimatedCost, upperTotalEstimatedCost, docIdForEdit } = useLocalSearchParams();
   const [userTrips, setUserTrips] = useState([]);
   const [transportation, setTransportation] = useState([]);
   const [selectedTransport, setSelectedTransport] = useState(null);
   const [lowerCost, setLowerCost] = useState(parseInt(lowerTotalEstimatedCost) || 0);
   const [upperCost, setUpperCost] = useState(parseInt(upperTotalEstimatedCost) || 0);
-  const [docId, setDocId] = useState()
-
-  useEffect(() => {
-    const fetchUserEmail = async () => {
-      try {
-        const userSession = await AsyncStorage.getItem('userSession');
-        if (userSession) {
-          const { email } = JSON.parse(userSession);
-          setUserEmail(email);
-          console.log("Retrieved User Email from transport:", email);
-        } else {
-          console.error("User session not found in AsyncStorage.");
-        }
-      } catch (error) {
-        console.error("Error retrieving user session:", error);
-      }
-    };
-
-    fetchUserEmail();
-  }, []);
+  const [docId, setDocId] = useState();
 
   useEffect(() => {
     const GetMyTrips = async () => {
@@ -54,17 +34,10 @@ export default function TourTransport() {
           } else {
             console.error("No trip found for docId:", docIdForEdit);
           }
-        } else if (userEmail) {
-          const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
-          const querySnapshot = await getDocs(q);
-          trips = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-          if (trips.length > 0) {
-            setDocId(trips[0]?.id);
-          }
         }
-  
+
         setUserTrips(trips);
-  
+
         if (trips.length > 0) {
           const transportationData = trips[0]?.tripData?.transportation || {};
           const mappedTransportation = Object.keys(transportationData).map((key) => {
@@ -72,56 +45,62 @@ export default function TourTransport() {
             const isSelected = transport.isSelectedTransport || false;
             return {
               id: key,
-              title: key === 'bus' ? 'Xe khách' : key === 'flight' ? 'Máy bay' : key === 'train' ? 'Tàu hỏa' : 'Tự lái',
-              icon: key === 'bus' ? (
-                <MaterialIcons name="directions-bus" size={24} color="black" />
-              ) : key === 'flight' ? (
-                <MaterialCommunityIcons name="airplane" size={26} color="black" />
-              ) : key === 'train' ? (
-                <FontAwesome5 name="train" size={24} color="black" />
-              ) : (
-                <Feather name="truck" size={24} color="black" />
-              ),
+              title:
+                key === 'bus'
+                  ? 'Xe khách'
+                  : key === 'flight'
+                  ? 'Máy bay'
+                  : key === 'train'
+                  ? 'Tàu hỏa'
+                  : 'Tự lái',
+              icon:
+                key === 'bus' ? (
+                  <MaterialIcons name="directions-bus" size={24} color="black" />
+                ) : key === 'flight' ? (
+                  <MaterialCommunityIcons name="airplane" size={26} color="black" />
+                ) : key === 'train' ? (
+                  <FontAwesome5 name="train" size={24} color="black" />
+                ) : (
+                  <Feather name="truck" size={24} color="black" />
+                ),
               details: transport.details || 'Tự lái phương tiện của bạn theo kế hoạch cá nhân.',
               price: transport.price || 0,
               bookingUrl: transport.booking_url || '#',
               isSelected,
             };
           });
-  
+
           const sortedTransportation = mappedTransportation.sort((a, b) => {
             if (a.id === 'self-drive') return 1;
             if (b.id === 'self-drive') return -1;
             return 0;
           });
-  
+
           setTransportation(sortedTransportation);
-  
+
           const selected = sortedTransportation.find((t) => t.isSelected);
           let initialLowerCost = parseInt(lowerTotalEstimatedCost) || 0;
           let initialUpperCost = parseInt(upperTotalEstimatedCost) || 0;
-  
+
           if (selected) {
             initialLowerCost += selected.price;
             initialUpperCost += selected.price;
             setSelectedTransport(selected.id);
           }
-  
+
           // Set initial costs
           setLowerCost(initialLowerCost);
           setUpperCost(initialUpperCost);
-  
-          // console.log("Initialized Costs:", initialLowerCost, initialUpperCost);
         }
       } catch (error) {
         console.error("Error fetching user trips:", error);
       }
     };
-  
-    if (userEmail || docIdForEdit) {
+
+    if (docIdForEdit) {
       GetMyTrips();
     }
-  }, [userEmail, docIdForEdit]);
+  }, [docIdForEdit]);
 
   const handleSelect = (id, price) => {
     setSelectedTransport((prevSelected) => {
@@ -153,7 +132,7 @@ export default function TourTransport() {
       console.error("No trips found for the user.");
       return;
     }
-  
+
     // Cập nhật transportation
     const currentTransportation = userTrips[0]?.tripData?.transportation || {};
     const updatedTransportation = Object.keys(currentTransportation).reduce((acc, key) => {
@@ -163,13 +142,11 @@ export default function TourTransport() {
       };
       return acc;
     }, {});
-  
-    // console.log("Updated Transportation:", updatedTransportation);
-  
+
     try {
       // Ensure you're targeting the correct trip using the document ID from userTrips
       const tripDocRef = doc(db, "UserTrips", docId);
-  
+
       // Use setDoc to replace the entire document, with a merge option to only update the relevant fields
       await setDoc(
         tripDocRef,
@@ -178,14 +155,14 @@ export default function TourTransport() {
             transportation: updatedTransportation,
           },
           lowerCost: lowerCost,
-          upperCost: upperCost
+          upperCost: upperCost,
         },
         { merge: true } // merge ensures only updated fields are written, not the entire document
       );
       console.log("Trip data updated successfully in Firebase.");
       router.push({
         pathname: '/tourFinalPreview',
-        params: {docId : docId}
+        params: { docId: docId },
       });
     } catch (error) {
       console.error("Error updating trip data in Firebase:", error);
@@ -210,7 +187,7 @@ export default function TourTransport() {
                     {option.icon}
                     <Text style={styles.cardTitle}>{option.title}</Text>
                   </View>
-                  <TouchableOpacity onPress={() => {handleSelect(option.id, option.price)}}>
+                  <TouchableOpacity onPress={() => { handleSelect(option.id, option.price); }}>
                     <Feather
                       name={selectedTransport === option.id ? "check" : "plus-circle"}
                       size={16}
@@ -249,6 +226,7 @@ export default function TourTransport() {
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
