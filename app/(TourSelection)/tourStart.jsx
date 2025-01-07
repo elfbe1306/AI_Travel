@@ -29,10 +29,17 @@ const AccordionItem = ({ title, expanded, toggleAccordion, renderContent }) => (
 
 
 const GetPhotoRef = async (PlaceName) => {
-  const resp = await fetch('https://maps.googleapis.com/maps/api/place/textsearch/json?query='+PlaceName+'&key='+process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY)
-  const result = await resp.json();
-  console.log(result);
-}
+  try {
+    const resp = await fetch(
+      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${PlaceName}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`
+    );
+    const result = await resp.json();
+    return result?.results[0]?.photos[0]?.photo_reference;
+  } catch (error) {
+    console.error("Error fetching photo reference:", error);
+    return null;
+  }
+};
 
 const getDateRange = (startDate, endDate) => {
   const start = new Date(startDate);
@@ -75,7 +82,6 @@ export default function TourStart() {
     };
 
     fetchUserEmail();
-    GetPhotoRef('Nha Trang');
   }, []);
 
   useEffect(() => {
@@ -163,6 +169,32 @@ export default function TourStart() {
     }
   };
 
+  const [photoRefs, setPhotoRefs] = useState({});
+
+  useEffect(() => {
+    const fetchPhotoReferences = async () => {
+      if (userTrips.length > 0) {
+        const allLocations = userTrips[0]?.tripData?.places_to_visit || [];
+        const photoPromises = allLocations.map(async (location) => {
+          const ref = await GetPhotoRef(location.placeName);
+          return { placeName: location.placeName, photoRef: ref };
+        });
+
+        const photoResults = await Promise.all(photoPromises);
+        const photoRefMap = photoResults.reduce((acc, curr) => {
+          if (curr.photoRef) {
+            acc[curr.placeName] = curr.photoRef;
+          }
+          return acc;
+        }, {});
+
+        setPhotoRefs(photoRefMap);
+      }
+    };
+
+    fetchPhotoReferences();
+  }, [userTrips]);
+
   const renderLocations = (dayKey) => {
     return (
       <ScrollView>
@@ -172,14 +204,20 @@ export default function TourStart() {
               selected.placeName === location.placeName && selected.day_visit === dayKey
           );
 
+          const photoRef = photoRefs[location.placeName];
+          const photoUri = photoRef
+            ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoRef}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`
+            : null;
+
           return (
             <View key={`${dayKey}-location${index}`} style={styles.customBox}>
-              <Image 
-                style={styles.image}
-                source={{
-                  uri: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${location.placeName}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`,
-                }}
-              />
+              {photoUri ? (
+                <Image style={styles.image} source={{ uri: photoUri }} />
+              ) : (
+                <View style={[styles.image, { justifyContent: 'center', alignItems: 'center' }]}>
+                  <Text>Loading...</Text>
+                </View>
+              )}
               <View style={styles.contentWrapper}>
                 <View style={styles.headCA}>
                   <Text style={styles.locaName}>{location.placeName}</Text>
