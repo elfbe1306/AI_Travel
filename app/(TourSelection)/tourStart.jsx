@@ -27,12 +27,18 @@ const AccordionItem = ({ title, expanded, toggleAccordion, renderContent }) => (
   </View>
 );
 
-
-const GetPhotoRef = async () => {
-  const resp = await fetch('https://maps.googleapis.com/maps/api/place/textsearch/json?query=restaurants%20in%20Sydney&key=AIzaSyCuTOmB0GB8tHgUZNazM8xeKLxGkkiN9OY')
-  const result = await resp.json();
-  console.log(result);
-}
+const GetPhotoRef = async (PlaceName) => {
+  try {
+    const resp = await fetch(
+      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${PlaceName}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`
+    );
+    const result = await resp.json();
+    return result?.results[0]?.photos[0]?.photo_reference;
+  } catch (error) {
+    console.error("Error fetching photo reference:", error);
+    return null;
+  }
+};
 
 const getDateRange = (startDate, endDate) => {
   const start = new Date(startDate);
@@ -51,32 +57,11 @@ export default function TourStart() {
   const router = useRouter();
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [selectedLocations, setSelectedLocations] = useState([]);
-  const [userEmail, setUserEmail] = useState(null);
   const [userTrips, setUserTrips] = useState([]);
   const [dateRange, setDateRange] = useState([]);
   const [docId, setDocId] = useState();
 
   const { docIdForEdit } = useLocalSearchParams();
-
-  useEffect(() => {
-    const fetchUserEmail = async () => {
-      try {
-        const userSession = await AsyncStorage.getItem('userSession');
-        if (userSession) {
-          const { email } = JSON.parse(userSession);
-          setUserEmail(email);
-          console.log("Retrieved User Email:", email);
-        } else {
-          console.error("User session not found in AsyncStorage.");
-        }
-      } catch (error) {
-        console.error("Error retrieving user session:", error);
-      }
-    };
-
-    fetchUserEmail();
-    // GetPhotoRef('Nha Trang');
-  }, []);
 
   useEffect(() => {
     const GetMyTrips = async () => {
@@ -90,16 +75,6 @@ export default function TourStart() {
           } else {
             console.error("No trip found for docId:", docIdForEdit);
           }
-        } else if (userEmail) {
-          // Use userEmail to fetch the trips
-          const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
-          const querySnapshot = await getDocs(q);
-          const trips = [];
-          querySnapshot.forEach((doc) => {
-            trips.push(doc.data());
-          });
-          setUserTrips(trips);
-          setDocId(trips[0]?.ID);
         }
       } catch (error) {
         console.error("Error fetching user trips:", error);
@@ -107,7 +82,7 @@ export default function TourStart() {
     };
 
     GetMyTrips();
-  }, [userEmail, docIdForEdit]);
+  }, [docIdForEdit]);
 
   useEffect(() => {
     if (userTrips.length > 0) {
@@ -163,6 +138,32 @@ export default function TourStart() {
     }
   };
 
+  const [photoRefs, setPhotoRefs] = useState({});
+
+  useEffect(() => {
+    const fetchPhotoReferences = async () => {
+      if (userTrips.length > 0) {
+        const allLocations = userTrips[0]?.tripData?.places_to_visit || [];
+        const photoPromises = allLocations.map(async (location) => {
+          const ref = await GetPhotoRef(location.placeName);
+          return { placeName: location.placeName, photoRef: ref };
+        });
+
+        const photoResults = await Promise.all(photoPromises);
+        const photoRefMap = photoResults.reduce((acc, curr) => {
+          if (curr.photoRef) {
+            acc[curr.placeName] = curr.photoRef;
+          }
+          return acc;
+        }, {});
+
+        setPhotoRefs(photoRefMap);
+      }
+    };
+
+    fetchPhotoReferences();
+  }, [userTrips]);
+
   const renderLocations = (dayKey) => {
     return (
       <ScrollView>
@@ -172,14 +173,20 @@ export default function TourStart() {
               selected.placeName === location.placeName && selected.day_visit === dayKey
           );
 
+          const photoRef = photoRefs[location.placeName];
+          const photoUri = photoRef
+            ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoRef}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`
+            : null;
+
           return (
             <View key={`${dayKey}-location${index}`} style={styles.customBox}>
-              <Image 
-                style={styles.image}
-                source={{
-                  uri: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${location.placeName}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`,
-                }}
-              />
+              {photoUri ? (
+                <Image style={styles.image} source={{ uri: photoUri }} />
+              ) : (
+                <View style={[styles.image, { justifyContent: 'center', alignItems: 'center' }]}>
+                  <Text>Loading...</Text>
+                </View>
+              )}
               <View style={styles.contentWrapper}>
                 <View style={styles.headCA}>
                   <Text style={styles.locaName}>{location.placeName}</Text>
@@ -198,7 +205,9 @@ export default function TourStart() {
                 </View>
                 <Text style={styles.subText}>{location.details}</Text>
                 <View style={styles.ContentDetail}>
+                  <View style={styles.IconDetail}>
                   <Feather name="clock" size={14} color="black" />
+                  </View>
                   <Text style={styles.textDetail}>
                     Thời gian tham quan: {location.best_time_to_visit}
                   </Text>
@@ -422,6 +431,7 @@ const styles = StyleSheet.create({
     fontFamily:'nunito',
     fontSize:13,
     fontWeight:400,
+    maxWidth:'97%',
   },
   IconDetail:{
     marginTop:'0.6%'
@@ -440,6 +450,7 @@ const styles = StyleSheet.create({
     fontWeight:600,
     fontSize:16,
     color:'#02954F',
+    padding:3,
   },
 
 

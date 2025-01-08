@@ -54,6 +54,19 @@ const getDateRange = (startDate, endDate) => {
   return dateArray;
 };
 
+const GetPhotoRef = async (placeName) => {
+  try {
+    const resp = await fetch(
+      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${placeName}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`
+    );
+    const result = await resp.json();
+    return result?.results[0]?.photos[0]?.photo_reference;
+  } catch (error) {
+    console.error("Error fetching photo reference:", error);
+    return null;
+  }
+};
+
 export default function TourFinalPreview() {
   const router = useRouter();
   const { docId } = useLocalSearchParams();
@@ -145,6 +158,43 @@ export default function TourFinalPreview() {
     'self-drive': 'Tự lái',
   };
 
+  const [photoRefs, setPhotoRefs] = useState({});
+
+  useEffect(() => {
+    if (userTrips.length > 0) {
+      const fetchPhotoReferences = async () => {
+        const allLocations = userTrips[0]?.tripData?.places_to_visit || [];
+        const photoPromises = allLocations.map(async (location) => {
+          const ref = await GetPhotoRef(location.placeName);
+          return { placeName: location.placeName, photoRef: ref };
+        });
+
+        const photoResults = await Promise.all(photoPromises);
+        const photoRefMap = photoResults.reduce((acc, curr) => {
+          if (curr.photoRef) acc[curr.placeName] = curr.photoRef;
+          return acc;
+        }, {});
+
+        setPhotoRefs(photoRefMap);
+      };
+
+      fetchPhotoReferences();
+    }
+  }, [userTrips]);
+
+  const [destinationPhotoRef, setDestinationPhotoRef] = useState(null);
+
+  useEffect(() => {
+    const fetchDestinationPhoto = async () => {
+      if (Destination) {
+        const photoRef = await GetPhotoRef(Destination);
+        setDestinationPhotoRef(photoRef);
+      }
+    };
+
+    fetchDestinationPhoto();
+  }, [Destination]);
+
   const renderLocations = (dayKey) => {
     const matchedLocations = selectedLocations.filter((location) => location.day_visit === dayKey);
 
@@ -156,7 +206,16 @@ export default function TourFinalPreview() {
       <ScrollView>
         {matchedLocations.map((location, index) => (
           <View key={`${dayKey}-location${index}`} style={styles.customBox}>
-            <Image source={{ uri: location.image_url }} style={styles.image} />
+            <Image
+              source={
+                photoRefs[location.placeName]
+                  ? {
+                      uri: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoRefs[location.placeName]}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`,
+                    }
+                  : require('../../assets/images/imageTourStart_nhatho.jpg') // Fallback image
+              }
+              style={styles.image}
+            />
             <View style={styles.contentWrapper}>
               <View style={styles.headCA}>
                 <Text style={styles.locaName}>{location.placeName}</Text>
@@ -184,10 +243,19 @@ export default function TourFinalPreview() {
 
   return (
     <ScrollView style={styles.container}>
-      <Image
-        source={require('../../assets/images/tourFinalPreviewHeroimage.png')}
-        style={{ width: '100%', height: 250 }}
-      />
+      {destinationPhotoRef ? (
+        <Image
+          source={{
+            uri: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${destinationPhotoRef}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`,
+          }}
+          style={{ width: '100%', height: 250 }}
+        />
+      ) : (
+        <Image
+          source={require('../../assets/images/tourFinalPreviewHeroimage.png')}
+          style={{ width: '100%', height: 250 }}
+        />
+      )}
 
       <View style={{ flexDirection: 'row', position: 'relative' }}>
         <TouchableOpacity style={{ position: 'absolute', top: 17, right: 60 }}>
@@ -258,7 +326,7 @@ export default function TourFinalPreview() {
       <View style={styles.reviewSchedule}>
         <Feather name="map" size={24} color="black" />
         <Text style={styles.reviewScheduleTitle}>Lịch trình</Text>
-
+        </View>
         {dateRange.map((date, index) => {
           const formattedDate = new Date(date).toLocaleDateString('vi-VN');
           return (
@@ -271,7 +339,7 @@ export default function TourFinalPreview() {
             />
           );
         })}
-      </View>
+      
     </ScrollView>
   );
 }
@@ -285,12 +353,17 @@ const styles = StyleSheet.create({
     marginHorizontal: '3%',
     alignItems: 'center',
     marginTop: '3%',
-    marginBottom: '5%'
+    flexDirection:'row',
+    
   },
   reviewScheduleTitle: {
-    fontFamily: 'nunito-bold',
-    fontSize: 18,
-    marginLeft: 10
+    fontFamily: 'nunito',
+    fontSize: 14,
+    marginLeft: 10,
+    lineHeight: 20,
+    letterSpacing: 0.5,
+    marginLeft: 12,
+  
   }
   ,
   common: {
@@ -324,7 +397,7 @@ const styles = StyleSheet.create({
     },
   },
   accordionItem: {
-    marginTop:'8%',
+    marginTop:'5%',
     marginLeft:'6%',
     marginRight:'6%',
     borderRadius:20,
@@ -404,8 +477,15 @@ const styles = StyleSheet.create({
     fontFamily:'nunito',
     fontSize:13,
     fontWeight:400,
+    maxWidth:'97%',
   },
   IconDetail:{
     marginTop:'0.6%'
   },
+  noLocationsText: {
+    textAlign: 'center',
+    fontFamily: 'nunito',
+    height: 25,
+    fontSize: 13
+  }
 });

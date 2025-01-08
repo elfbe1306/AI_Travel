@@ -1,15 +1,14 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView} from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors } from '../../constants/Colors';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 import Collapsible from 'react-native-collapsible';
-import { collection, getDocs, query, where, getDoc, doc} from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../configs/FireBaseConfig';
 
 const AccordionItem = ({ title, expanded, toggleAccordion, renderContent }) => (
@@ -40,57 +39,40 @@ const getDateRange = (startDate, endDate) => {
   return dateArray;
 };
 
+const GetPhotoRef = async (PlaceName) => {
+  try {
+    const resp = await fetch(
+      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${PlaceName}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`
+    );
+    const result = await resp.json();
+    return result?.results[0]?.photos[0]?.photo_reference;
+  } catch (error) {
+    console.error("Error fetching photo reference:", error);
+    return null;
+  }
+};
+
 export default function TourFinal() {
   const router = useRouter();
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [lowerTotalEstimatedCost, setLowerTotalEstimatedCost] = useState(0);
   const [upperTotalEstimatedCost, setUpperTotalEstimatedCost] = useState(0);
-  const [userEmail, setUserEmail] = useState(null);
   const [userTrips, setUserTrips] = useState([]);
   const [dateRange, setDateRange] = useState([]);
 
   const { docIdForEdit } = useLocalSearchParams();
 
   useEffect(() => {
-    const fetchUserEmail = async () => {
-      try {
-        const userSession = await AsyncStorage.getItem('userSession');
-        if (userSession) {
-          const { email } = JSON.parse(userSession);
-          setUserEmail(email);
-          console.log("Retrieved User Email:", email);
-        } else {
-          console.error("User session not found in AsyncStorage.");
-        }
-      } catch (error) {
-        console.error("Error retrieving user session:", error);
-      }
-    };
-
-    fetchUserEmail();
-  }, []);
-
-  useEffect(() => {
     const GetMyTrips = async () => {
       try {
         if (docIdForEdit) {
-          // Use docIdForEdit to fetch the trip data
           const tripDoc = await getDoc(doc(db, 'UserTrips', docIdForEdit));
           if (tripDoc.exists()) {
             setUserTrips([tripDoc.data()]);
           } else {
             console.error("No trip found for docId:", docIdForEdit);
           }
-        } else if (userEmail) {
-          // Use userEmail to fetch the trips
-          const q = query(collection(db, 'UserTrips'), where('userEmail', '==', userEmail));
-          const querySnapshot = await getDocs(q);
-          const trips = [];
-          querySnapshot.forEach((doc) => {
-            trips.push(doc.data());
-          });
-          setUserTrips(trips);
         }
       } catch (error) {
         console.error("Error fetching user trips:", error);
@@ -98,7 +80,7 @@ export default function TourFinal() {
     };
 
     GetMyTrips();
-  }, [userEmail, docIdForEdit]);
+  }, [docIdForEdit]);
 
   useEffect(() => {
     if (userTrips.length > 0) {
@@ -106,7 +88,6 @@ export default function TourFinal() {
       const dates = getDateRange(StartDate, EndDate);
       setDateRange(dates);
 
-      // Preselect locations with day_visit
       const allLocations = userTrips[0]?.tripData?.places_to_visit || [];
       const preselectedLocations = allLocations
         .filter((location) => location.day_visit !== "None")
@@ -135,8 +116,35 @@ export default function TourFinal() {
     }
   }, [selectedLocations]);
 
+  const [photoRefs, setPhotoRefs] = useState({});
+
+  useEffect(() => {
+    if (userTrips.length > 0) {
+      const fetchPhotoReferences = async () => {
+        const allLocations = userTrips[0]?.tripData?.places_to_visit || [];
+        const photoPromises = allLocations.map(async (location) => {
+          const ref = await GetPhotoRef(location.placeName);
+          return { placeName: location.placeName, photoRef: ref };
+        });
+
+        const photoResults = await Promise.all(photoPromises);
+        const photoRefMap = photoResults.reduce((acc, curr) => {
+          if (curr.photoRef) acc[curr.placeName] = curr.photoRef;
+          return acc;
+        }, {});
+
+        setPhotoRefs(photoRefMap);
+      };
+
+      fetchPhotoReferences();
+    }
+  }, [userTrips]);
+
+
   const renderLocations = (dayKey) => {
-    const matchedLocations = selectedLocations.filter((location) => location.day_visit === dayKey);
+    const matchedLocations = selectedLocations.filter(
+      (location) => location.day_visit === dayKey
+    );
 
     if (!matchedLocations || matchedLocations.length === 0) {
       return <Text style={styles.noLocationsText}>Bạn không có lịch trình trong ngày hôm nay</Text>;
@@ -144,32 +152,30 @@ export default function TourFinal() {
 
     return (
       <ScrollView>
-        {matchedLocations.map((location, index) => (
-          <View key={`${dayKey}-location${index}`} style={styles.customBox}>
-            <Image source={{ uri: location.image_url }} style={styles.image} />
-            <View style={styles.contentWrapper}>
-              <View style={styles.headCA}>
+        {matchedLocations.map((location, index) => {
+          const photoRef = photoRefs[location.placeName];
+          const photoUri = photoRef
+            ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoRef}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`
+            : null;
+
+          return (
+            <View key={`${dayKey}-location${index}`} style={styles.customBox}>
+              {photoUri ? (
+                <Image source={{ uri: photoUri }} style={styles.image} />
+              ) : (
+                <View style={[styles.image, { justifyContent: 'center', alignItems: 'center' }]}>
+                  <Text>Loading...</Text>
+                </View>
+              )}
+              <View style={styles.contentWrapper}>
                 <Text style={styles.locaName}>{location.placeName}</Text>
-                <View style={styles.IconWrapper}>
-                  <Feather name="navigation" size={16} color="black" />
-                </View>
-              </View>
-              <Text style={styles.subText}>{location.details}</Text>
-              <View style={styles.ContentDetail}>
-                <View style={styles.IconDetail}>
-                  <Feather name="clock" size={14} color="black" />
-                </View>
-                <Text style={styles.textDetail}>Thời gian tham quan: {location.best_time_to_visit}</Text>
-              </View>
-              <View style={styles.ContentDetail}>
-                <Ionicons name="ticket-outline" size={15} color="black" />
-                <Text style={styles.textDetail}>Giá vé: {location.ticket_price.toLocaleString()} đồng</Text>
+                <Text style={styles.subText}>{location.details}</Text>
               </View>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </ScrollView>
-    )
+    );
   };
 
   return (
@@ -218,6 +224,7 @@ export default function TourFinal() {
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -330,6 +337,7 @@ const styles = StyleSheet.create({
     fontFamily:'nunito',
     fontSize:13,
     fontWeight:400,
+    maxWidth:'97%',
   },
   IconDetail:{
     marginTop:'0.6%'
@@ -348,6 +356,7 @@ const styles = StyleSheet.create({
     fontWeight:600,
     fontSize:16,
     color:'#02954F',
+    padding:3,
   },
   noLocationsText: {
     textAlign: 'center',
