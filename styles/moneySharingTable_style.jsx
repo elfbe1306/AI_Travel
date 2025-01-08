@@ -179,4 +179,21 @@ export const styles = StyleSheet.create({
         textAlign:'center',
         paddingVertical:'10%'
       },
+
+      nameBox: {
+        fontSize: 12,
+        fontFamily: 'nunito-bold',
+        marginVertical: 8,
+        marginHorizontal: 10,
+        textAlign:'center',
+        padding: 5
+      },
+      selectedNamesContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+      },
+      nameBoxText: {
+
+      }
+  
   });

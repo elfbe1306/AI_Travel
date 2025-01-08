@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native'
-import React from 'react'
-import { useRouter } from 'expo-router'
+import React, { useEffect } from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { styles } from '../../styles/moneySharingFinal_style';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -8,6 +8,12 @@ import Feather from '@expo/vector-icons/Feather';
 
 export default function MoneySharingFinal() {
   const router = useRouter();
+  const {updatedCategories} = useLocalSearchParams();
+
+  useEffect(() => {
+    const parsedCategories = JSON.parse(updatedCategories);
+    console.log('Parsed Categories:', JSON.stringify(parsedCategories, null, 2)); // Pretty print JSON
+  }, []);
 
   return (
     <View style={styles.container}>
