@@ -69,7 +69,7 @@ export default function Home() {
       <View style={styles.bodyContainer}>
         <View style={styles.firstBodyContainer}>
           <Text style={styles.tourTitle}>Tour của tôi</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/mytrip')}>
             <Text style={styles.viewAllText}>Xem tất cả</Text>
           </TouchableOpacity>
         </View>

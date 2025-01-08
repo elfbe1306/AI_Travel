@@ -96,7 +96,7 @@ export const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 3,
+    elevation: 5,
     // Border xung quanh card
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
