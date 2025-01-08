@@ -9,7 +9,7 @@ import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 import Collapsible from 'react-native-collapsible';
-import { collection, getDocs, query, where, setDoc, doc, getDoc } from 'firebase/firestore';
+import {setDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../configs/FireBaseConfig';
 
 // Accordion component

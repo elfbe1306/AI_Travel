@@ -1,12 +1,11 @@
-import { View, Text, Image, TouchableOpacity, ScrollView, TouchableHighlight } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Colors } from '../../constants/Colors';
 import Feather from '@expo/vector-icons/Feather';
 import { styles } from '../../styles/mytrip_style';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { collection, getDocs, query, where, doc, setDoc, getDoc } from 'firebase/firestore';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { collection, getDocs } from 'firebase/firestore';
+import { useRouter } from 'expo-router';
 import { db } from '../../configs/FireBaseConfig';
 
 export default function MyTrip() {
