@@ -19,7 +19,6 @@ export default function MyTrip() {
       const toursData = [];
       querySnapshot.forEach((doc) => {
         toursData.push({ id: doc.id, ...doc.data() }); // Lấy dữ liệu và thêm vào mảng
-        toursData.push({ id: doc.id + 1, ...doc.data() }); // Lấy dữ liệu và thêm vào mảng
       });
       setTours(toursData); // Cập nhật state với dữ liệu mới
     } catch (error) {
@@ -58,7 +57,7 @@ export default function MyTrip() {
         <ScrollView style={styles.tourScrollView} showsVerticalScrollIndicator={false}>
           {tours.map(tour => (
             <TouchableOpacity key={tour.id} style={styles.tourCard} onPress={() => router.push({ pathname: '/tourStart', params: { docIdForEdit: tour.id } })}>
-              <Image source={{ uri: tour.tripData.places_to_visit[0].image_url }} style={styles.tourImage} />
+              <Image source={{}} style={styles.tourImage} />
               <Text style={styles.tourDestination}>{tour.Destination}</Text>
               <Text style={styles.tourDate}>{new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(tour.StartDate))}</Text>
               <TouchableOpacity style={styles.tourMarker}>

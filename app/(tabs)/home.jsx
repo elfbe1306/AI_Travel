@@ -4,17 +4,9 @@ import { Colors } from '../../constants/Colors';
 import Feather from '@expo/vector-icons/Feather';
 import { styles } from '../../styles/home_style';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { collection, getDocs, query, where, doc, setDoc, getDoc } from 'firebase/firestore';
+import { useRouter } from 'expo-router';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../configs/FireBaseConfig';
-
-// Mockup data for tours
-const mockTours = [
-  { id: 1, tourDestination: 'QUY NHƠN', tourDate: '02/01/2025', image: require('../../assets/images/homeTourQuyNhon.png') },
-  { id: 2, tourDestination: 'HÀ NỘI', tourDate: '03/09/2025', image: require('../../assets/images/homeTourHaNoi.png') },
-  // Add more tours as needed
-];
 
 export default function Home() {
   const router = useRouter();
