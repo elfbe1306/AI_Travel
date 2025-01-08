@@ -20,35 +20,45 @@ export const styles = StyleSheet.create({
     paddingBottom: '20%',
   },
   firstHeaderContainer: {
-    gap: screenWidth - 300,
+    // gap: screenWidth - 300,
     marginTop: '15%',
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   userNameBox: {
     backgroundColor: 'white',
-    paddingLeft: 5,
-    paddingRight: 30,
+    paddingHorizontal: 10, // Giảm padding ngang để tiết kiệm không gian
     paddingVertical: 5,
     borderRadius: 40,
-    marginLeft: '5%',
     flexDirection: 'row',
-    width: 200,
+    alignItems: 'center', // Căn giữa các phần tử theo chiều dọc
+    width: '33%', // Chiếm 1/3 chiều rộng màn hình
+    justifyContent: 'flex-start', // Căn các phần tử về phía bên trái
+    marginLeft: '5%',
   },
   imageBox: {
     backgroundColor: 'pink',
     borderRadius: 99,
-    height: 50,
+    width: 40, // Giữ nguyên kích thước hình ảnh
+    height: 40, // Giữ nguyên kích thước hình ảnh
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   userImage: {
-    top: -30,
-    width: 50,
-    height: 75,
+    width: 40, // Giữ nguyên kích thước hình ảnh
+    height: 60, // Giữ nguyên kích thước hình ảnh
+    borderRadius: 25, // Bo góc để phù hợp với kích thước
+    top: -12,
   },
   userName: {
-    marginTop: 16,
-    marginLeft: 10,
     fontFamily: 'nunito-bold',
-    textAlign: 'center',
+    fontSize: 12, // Giảm kích thước chữ để phù hợp với không gian nhỏ hơn
+    marginLeft: 8, // Khoảng cách giữa hình ảnh và chữ
+    flexShrink: 1, // Cho phép chữ co lại nếu không đủ không gian
+    overflow: 'hidden', // Ẩn phần chữ vượt quá kích thước
+    whiteSpace: 'nowrap', // Ngăn chữ xuống dòng
+    textOverflow: 'ellipsis', // Hiển thị dấu "..." nếu chữ quá dài
   },
   notificationButton: {
     padding: 15,
@@ -99,7 +109,7 @@ export const styles = StyleSheet.create({
     marginHorizontal: 10,
     width: cardWidth, // Sử dụng chiều rộng mới
     height: cardHeight, // Giữ nguyên chiều cao hoặc điều chỉnh nếu cần
-    padding: 12,
+    padding: 14,
     marginBottom: 20, // Thêm khoảng cách giữa các card
     // Hiệu ứng shadow để tạo cảm giác nổi
     shadowColor: '#000',
@@ -126,7 +136,9 @@ export const styles = StyleSheet.create({
     lineHeight: 24,
     letterSpacing: 0.5,
     color: '#1B1E28',
-    marginTop: 10,
+    // marginTop: 10,
+    marginLeft: '1%',
+    flexShrink: 1,
   },
   tourDate: {
     fontFamily: 'Nunito',
@@ -135,6 +147,8 @@ export const styles = StyleSheet.create({
     lineHeight: 16,
     letterSpacing: 0.5,
     color: '#7D848D',
+    marginLeft: '1%',
+    zIndex: 1,
   },
   tourMarker: {
     position: 'absolute',
@@ -147,5 +161,87 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backdropFilter: 'blur(30px)',
+  },
+  searchBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F7F7F9',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    height: 40,
+    flex: 1,
+    marginLeft: 10,
+    marginRight: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  searchBar: {
+    flex: 1,
+    height: 40,
+    fontFamily: 'Nunito',
+    fontSize: 12,
+    fontWeight: '400',
+    lineHeight: 16,
+    letterSpacing: 0.3,
+    color: '#7D848D',
+  },
+  tourInfo: {
+    marginTop: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  codePopup: {
+    position: 'absolute',
+    top: 35,
+    right: -25,
+    backgroundColor: '#D5E9D2',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 25,
+    zIndex: 100,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: '#DCD7D7',
+    borderWidth: 1,
+    elevation: 10,
+    // width: screenWidth * 0.62
+  },
+  codeText: {
+    fontFamily: 'Nunito',
+    fontSize: 10,
+    fontWeight: '700',
+    lineHeight: 13.64,
+    color: '#0A6138',
+    marginRight: 5,
+  },
+  codeBox: {
+    backgroundColor: '#F8F7F7',
+    padding: 4,
+    borderRadius: 25,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: '#DCD7D7',
+    borderWidth: 1,
+    // width: 200,
+  },
+  codeImage: {
+    width: 20,
+    top: -17,
+    right: 25,
+    position: 'absolute',
+    zIndex: 1000,
+
+  },
+  tourCode: {
+    fontFamily: 'Nunito',
+    fontSize: 10,
+    fontWeight: '700',
+    lineHeight: 13.64,
+    color: '#7D848D',
+    marginRight: 5,
   },
 });
