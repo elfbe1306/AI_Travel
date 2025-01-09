@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, ScrollView, TouchableHighlight, TextInput, Alert } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, TouchableHighlight, TextInput, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Colors } from '../../constants/Colors';
 import Feather from '@expo/vector-icons/Feather';
@@ -10,10 +10,33 @@ import { collection, getDocs, query, where, doc, setDoc, getDoc } from 'firebase
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { db } from '../../configs/FireBaseConfig';
 
+function ResultDropDown({ visible, onClose, tour }) {
+  if (!visible || !tour) return null;
+
+  return (
+    <View style={styles.searchResultDropdown}>
+      <Text style={styles.searchResultTitle}>
+        Du lịch {tour.Destination} tạo bởi {tour.userName}
+      </Text>
+      <View style={styles.searchResultDateAndJoinButton}>
+        <Text style={styles.searchResultDate}>
+          {new Date(tour.StartDate).toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'})}
+        </Text>
+        <TouchableOpacity style={styles.tourJoinButton}>
+          <Text style={styles.tourJoinButtonText}>Tham gia</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
 export default function MyTrip() {
   const router = useRouter();
   const [showCodePopup, setShowCodePopup] = useState(null); // State để lưu trữ ID của card đang hiển thị popup
   const [tours, setTours] = useState([]); // State để lưu trữ dữ liệu tour
+  const [showResultDropDown, setShowResultDropDown] = useState(false); // State để quản lý việc hiển thị ResultDropDown
+  const [searchText, setSearchText] = useState(''); // State để lưu trữ giá trị nhập vào ô tìm kiếm
+  const [searchResult, setSearchResult] = useState(null); // State để lưu trữ kết quả tìm kiếm
 
   // Hàm sao chép mã code vào clipboard
   const copyToClipboard = async (code) => {
@@ -40,75 +63,115 @@ export default function MyTrip() {
     }
   };
 
+  // Hàm tìm kiếm tour bằng ID
+  const searchTourById = async (id) => {
+    try {
+      const docRef = doc(db, 'UserTrips', id); // Tham chiếu đến document có ID tương ứng
+      const docSnap = await getDoc(docRef); // Lấy dữ liệu từ document
+
+      if (docSnap.exists()) {
+        setSearchResult({ id: docSnap.id, ...docSnap.data() }); // Lưu kết quả tìm kiếm vào state
+        setShowResultDropDown(true); // Hiển thị dropdown
+      } else {
+        Alert.alert('Không tìm thấy', 'Không có tour nào với ID này.'); // Hiển thị thông báo nếu không tìm thấy
+        setSearchResult(null); // Đặt kết quả tìm kiếm về null
+        setShowResultDropDown(false); // Ẩn dropdown
+      }
+    } catch (error) {
+      console.error('Lỗi khi tìm kiếm tour: ', error);
+      Alert.alert('Lỗi', 'Đã xảy ra lỗi khi tìm kiếm tour.'); // Hiển thị thông báo lỗi
+    }
+  };
+
   // Sử dụng useEffect để gọi hàm fetchTours mỗi khi component được render
   useEffect(() => {
     fetchTours();
   }, []);
 
-  return (
-    <View style={{ backgroundColor: Colors.LIME_GREEN, flex: 1 }}>
-      <View style={styles.headerContainer}>
-        <View style={styles.firstHeaderContainer}>
-          <View style={styles.userNameBox}>
-            <View style={styles.imageBox}>
-              <Image source={require('../../assets/images/character.png')} style={styles.userImage} />
-            </View>
-            <Text style={styles.userName}>Doan Le Vy </Text>
-          </View>
+  // Hàm xử lý sự kiện scroll
+  const handleScroll = () => {
+    setShowResultDropDown(false); // Ẩn ResultDropDown khi cuộn
+  };
 
-          <View style={styles.searchBarContainer}>
-            <Feather name="search" size={20} color="#7D848D"/>
-            <TextInput
-              style={styles.searchBar}
-              placeholder="Nhập tour được chia sẻ"
-              placeholderTextColor="#7D848D"
-            />
+  return (
+    <TouchableWithoutFeedback onPress={() => { setShowResultDropDown(false); Keyboard.dismiss(); }}>
+      <View style={{ backgroundColor: Colors.LIME_GREEN, flex: 1 }}>
+        <View style={styles.headerContainer}>
+          <View style={styles.firstHeaderContainer}>
+            <View style={styles.userNameBox}>
+              <View style={styles.imageBox}>
+                <Image source={require('../../assets/images/character.png')} style={styles.userImage} />
+              </View>
+              <Text style={styles.userName}>Doan Le Vy </Text>
+            </View>
+
+            <View style={styles.searchContainer}>
+              <View style={styles.searchBarContainer}>
+                <Feather name="search" size={20} color="#7D848D" />
+                <TextInput
+                  style={styles.searchBar}
+                  placeholder="Nhập tour được chia sẻ"
+                  placeholderTextColor="#7D848D"
+                  value={searchText}
+                  onChangeText={(text) => setSearchText(text)} // Cập nhật giá trị nhập vào
+                  onFocus={() => setShowResultDropDown(true)}
+                  onSubmitEditing={() => searchTourById(searchText)} // Gọi hàm tìm kiếm khi nhấn Enter
+                />
+              </View>
+
+              <ResultDropDown visible={showResultDropDown} onClose={() => setShowResultDropDown(false)} tour={searchResult} />
+            </View>
           </View>
         </View>
-      </View>
 
-      <Text style={styles.tourTitle}>Tour của tôi</Text>
-      <View style={styles.bodyContainer}>
-        <ScrollView style={styles.tourScrollView} showsVerticalScrollIndicator={false}>
-          {tours.map(tour => (
-            <TouchableOpacity key={tour.id} style={styles.tourCard} onPress={() => router.push({ pathname: '/tourStart', params: { docIdForEdit: tour.id } })}>
-              <Image source={{ uri: tour.tripData.places_to_visit[0].image_url }} style={styles.tourImage} />
-              
-              <View style={styles.tourInfo}>
-                <Text style={styles.tourDestination}>{tour.Destination}</Text>
-                <Feather 
-                  name="share-2" 
-                  size={24} 
-                  color="black" 
-                  onPress={() => setShowCodePopup(showCodePopup === tour.id ? null : tour.id)}
-                />
-                {showCodePopup === tour.id && (
-                  <View style={styles.codePopup}>
-                    <Image source={require('../../assets/images/play.png')} style={styles.codeImage} />
-                    <Text style={styles.codeText}>Mã code</Text>
-                    <TouchableOpacity 
-                      style={styles.codeBox} 
-                      onPress={() => {
-                        copyToClipboard(tour.id); 
-                        setShowCodePopup(null);
-                      }}
-                    >
-                      <Feather name="copy" size={16} color="#0A6138" />
-                      <Text style={styles.tourCode}>{tour.id}</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-              
-              <Text style={styles.tourDate}>{new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(tour.StartDate))}</Text>
-              
-              <TouchableOpacity style={styles.tourMarker}>
-                <Feather name="bookmark" size={20} color="white" />
+        <Text style={styles.tourTitle}>Tour của tôi</Text>
+        <View style={styles.bodyContainer}>
+          <ScrollView 
+            style={styles.tourScrollView} 
+            showsVerticalScrollIndicator={false}
+            onScroll={handleScroll} // Thêm sự kiện onScroll
+            scrollEventThrottle={16} // Đảm bảo sự kiện scroll được gọi thường xuyên
+          >
+            {tours.map(tour => (
+              <TouchableOpacity key={tour.id} style={styles.tourCard} onPress={() => router.push({ pathname: '/tourStart', params: { docIdForEdit: tour.id } })}>
+                <Image source={{ uri: tour.tripData.places_to_visit[0].image_url }} style={styles.tourImage} />
+                
+                <View style={styles.tourInfo}>
+                  <Text style={styles.tourDestination}>{tour.Destination}</Text>
+                  <Feather 
+                    name="share-2" 
+                    size={24} 
+                    color="black" 
+                    onPress={() => setShowCodePopup(showCodePopup === tour.id ? null : tour.id)}
+                  />
+                  {showCodePopup === tour.id && (
+                    <View style={styles.codePopup}>
+                      <Image source={require('../../assets/images/play.png')} style={styles.codeImage} />
+                      <Text style={styles.codeText}>Mã code</Text>
+                      <TouchableOpacity 
+                        style={styles.codeBox} 
+                        onPress={() => {
+                          copyToClipboard(tour.id); 
+                          setShowCodePopup(null);
+                        }}
+                      >
+                        <Feather name="copy" size={16} color="#0A6138" />
+                        <Text style={styles.tourCode}>{tour.id}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+                
+                <Text style={styles.tourDate}>{new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(tour.StartDate))}</Text>
+                
+                <TouchableOpacity style={styles.tourMarker}>
+                  <Feather name="bookmark" size={20} color="white" />
+                </TouchableOpacity>
               </TouchableOpacity>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+            ))}
+          </ScrollView>
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
