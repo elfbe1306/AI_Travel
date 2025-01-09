@@ -23,13 +23,13 @@ const GetPhotoRef = async (PlaceName) => {
   }
 };
 
-function ResultDropDown({ visible, onClose, tour, onJoinTour }) {
+function ResultDropDown({ visible, onClose, tour, onJoinTour, tourOwnerName }) {
   if (!visible || !tour) return null;
 
   return (
     <View style={styles.searchResultDropdown}>
       <Text style={styles.searchResultTitle}>
-        Du lịch {tour.Destination} tạo bởi {tour.userName}
+        Du lịch {tour.Destination} tạo bởi {tourOwnerName}
       </Text>
       <View style={styles.searchResultDateAndJoinButton}>
         <Text style={styles.searchResultDate}>
@@ -54,6 +54,7 @@ export default function MyTrip() {
   const [refreshing, setRefreshing] = useState(false);
   const [userName, setUserName] = useState('');
   const [tourImages, setTourImages] = useState({}); // To store fetched images by tour ID
+  const [tourOwnerName, setTourOwnerName] = useState('Other User')
 
   useEffect(() => {
     const checkSession = async () => {
@@ -95,7 +96,7 @@ export default function MyTrip() {
       Alert.alert('Lỗi', 'Không thể sao chép mã code.'); // Hiển thị thông báo lỗi
     }
   };
-  
+
   const fetchTours = async (userEmail) => {
     try {
       const querySnapshot = await getDocs(collection(db, 'UserTrips'));
@@ -133,6 +134,23 @@ export default function MyTrip() {
     await fetchTours(currentUserEmail);
   };
 
+  const fetchSearchTourUserName = async (email) => {
+    try {
+      const usersQuery = query(collection(db, 'users'), where('email', '==', email));
+      const querySnapshot = await getDocs(usersQuery);
+      
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        const userData = userDoc.data();
+        setTourOwnerName(() => userData.fullName || 'Default User');
+      } else {
+        console.warn('No matching user document found');
+      }
+    } catch (error) {
+      console.error('Error fetching user name: ', error);
+    }
+  };
+
   const searchTourById = async (id) => {
     try {
       const docRef = doc(db, 'UserTrips', id);
@@ -140,6 +158,9 @@ export default function MyTrip() {
       
       if (docSnap.exists()) {
         setSearchResult({ id: docSnap.id, ...docSnap.data() });
+        // console.log('before:', searchResult.userEmail)
+        await fetchSearchTourUserName(searchResult.userEmail)
+        // console.log('after: ', tourOwnerName)
         setShowResultDropDown(true);
       } else {
         Alert.alert('Không tìm thấy', 'Không có tour nào với ID này.');
@@ -202,6 +223,7 @@ export default function MyTrip() {
                 onClose={() => setShowResultDropDown(false)} 
                 tour={searchResult} 
                 onJoinTour={handleJoinTour}
+                tourOwnerName={tourOwnerName}
               />
             </View>
           </View>
