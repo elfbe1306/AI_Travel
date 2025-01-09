@@ -188,10 +188,16 @@ export default function MoneySharingFinal() {
           })}
         </Text>
       </View>
+      
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={24} color="black" />
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
-        <Ionicons name="chevron-back" size={24} color="black" />
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.returnHome} onPress={() => router.replace()}>
+          <Ionicons name="home-outline" size={24} color="black" />
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -200,15 +206,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#D3EC9E',
-  },
-  returnButton: {
-    marginTop: '5%',
-    marginLeft: '4%',
-    marginRight: '82%',
-    marginBottom: '5%',
-    padding: 15,
-    backgroundColor: 'white',
-    borderRadius: 99,
   },
   firstHeaderContainer: {
     gap: GAP,
@@ -299,5 +296,22 @@ const styles = StyleSheet.create({
   totalBold: {
     fontFamily: 'nunito-bold',
     color: '#0A6138'
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    marginTop: '5%'
+  },
+  returnHome: {
+    marginRight: '4%',
+    padding: 15,
+    backgroundColor: 'white',
+    borderRadius: 99,
+  },
+  returnButton: {
+    marginLeft: '5%',
+    marginRight: '62%',
+    padding: 15,
+    backgroundColor: 'white',
+    borderRadius: 99,
   },
 });
