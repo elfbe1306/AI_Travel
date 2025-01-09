@@ -13,8 +13,8 @@ export const Colors = {
   DARK_GREEN: '#02954F', // SignUp 'Button'
   AVOCADO_GREEN: '#A1D599', //background 'WHO' and 'SEARCH'
   GRAPE_GREEN: '#D3EC9E', //background 'DATE'
-  LIGHT_GREEN: '#64BA50', 
-  LIGHT_GRAY: '#BCBEC0',
+  LIGHT_GREEN: '#64BA50', //Onboarding_text
+  LIGHT_GRAY: '#BCBEC0', //WHO_sticker 
   LIME_GREEN: '#E8F2D4', // Home background
   LIGHT_WHITE: 'rgba(255, 255, 255, 0.8)', //background SignUpBox
   light: {
