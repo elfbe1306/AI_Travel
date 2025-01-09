@@ -85,6 +85,17 @@ export default function MyTrip() {
     }
   };
 
+    // Hàm sao chép mã code vào clipboard
+  const copyToClipboard = async (code) => {
+    try {
+      await Clipboard.setStringAsync(code); // Sao chép mã code vào clipboard
+      Alert.alert('Thành công', 'Mã code đã được sao chép!'); // Hiển thị thông báo
+    } catch (error) {
+      console.error('Lỗi khi sao chép mã code: ', error);
+      Alert.alert('Lỗi', 'Không thể sao chép mã code.'); // Hiển thị thông báo lỗi
+    }
+  };
+  
   const fetchTours = async (userEmail) => {
     try {
       const querySnapshot = await getDocs(collection(db, 'UserTrips'));
