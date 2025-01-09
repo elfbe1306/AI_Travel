@@ -11,58 +11,77 @@ import { db } from '../../configs/FireBaseConfig';
 
 export default function Home() {
   const router = useRouter();
-  const [tours, setTours] = useState([]); // State để lưu trữ dữ liệu tour
-  const [currentUserEmail, setCurrentUserEmail] = useState(''); // State để lưu trữ email của người dùng hiện tại
-  const [refreshing, setRefreshing] = useState(false); // State để quản lý trạng thái refresh
+  const [tours, setTours] = useState([]); // State to store tours
+  const [currentUserEmail, setCurrentUserEmail] = useState(''); // State to store current user's email
+  const [userName, setUserName] = useState(''); // State to store user's name
+  const [refreshing, setRefreshing] = useState(false); // State to manage refresh state
 
-  // Hàm lấy email người dùng hiện tại để tham gia tour du lịch
+  // Fetch user session and user name
   useEffect(() => {
     const checkSession = async () => {
       const user = await AsyncStorage.getItem('userSession');
       if (user) {
         const userData = JSON.parse(user);
         setCurrentUserEmail(userData.email);
-        fetchTours(userData.email); // Gọi hàm fetchTours với email của người dùng
+        fetchUserName(userData.email); // Fetch user's name
+        fetchTours(userData.email); // Fetch tours with user's email
       }
     };
     checkSession();
   }, []);
 
-  // Hàm để lấy dữ liệu từ Firebase
-  const fetchTours = async (userEmail) => {
+  // Fetch user's name from Firestore
+  const fetchUserName = async (email) => {
     try {
-      const querySnapshot = await getDocs(collection(db, 'UserTrips')); // 'UserTrips' là tên collection trong Firestore
-      const toursData = [];
-      querySnapshot.forEach((doc) => {
-        const tourData = doc.data();
-        // Kiểm tra xem người dùng hiện tại có trong mảng participants không
-        if (tourData.participants && tourData.participants.includes(userEmail)) {
-          toursData.push({ id: doc.id, ...tourData }); // Lấy dữ liệu và thêm vào mảng
-        }
-      });
-      setTours(toursData); // Cập nhật state với dữ liệu mới
+      const usersQuery = query(collection(db, 'users'), where('email', '==', email));
+      const querySnapshot = await getDocs(usersQuery);
+      
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0]; // Get the first matching document
+        const userData = userDoc.data();
+        setUserName(userData.fullName || ''); // Use fullName or fallback to an empty string
+      } else {
+        console.warn('No matching user document found');
+      }
     } catch (error) {
-      console.error('Error fetching tours: ', error);
-    } finally {
-      setRefreshing(false); // Dừng hiệu ứng refresh sau khi hoàn thành
+      console.error('Error fetching user name: ', error);
     }
   };
 
-  // Hàm xử lý khi người dùng kéo xuống để refresh
+  // Fetch tours from Firestore
+  const fetchTours = async (userEmail) => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'UserTrips')); // 'UserTrips' is the Firestore collection name
+      const toursData = [];
+      querySnapshot.forEach((doc) => {
+        const tourData = doc.data();
+        if (tourData.participants && tourData.participants.includes(userEmail)) {
+          toursData.push({ id: doc.id, ...tourData });
+        }
+      });
+      setTours(toursData);
+    } catch (error) {
+      console.error('Error fetching tours: ', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // Refresh handler
   const onRefresh = async () => {
-    setRefreshing(true); // Bắt đầu hiệu ứng refresh
-    await fetchTours(currentUserEmail); // Gọi lại hàm fetchTours để cập nhật dữ liệu
+    setRefreshing(true);
+    await fetchTours(currentUserEmail);
   };
 
   return (
-    <View style={{backgroundColor: Colors.LIME_GREEN, flex: 1}}>
+    <View style={{ backgroundColor: Colors.LIME_GREEN, flex: 1 }}>
       <View style={styles.headerContainer}>
         <View style={styles.firstHeaderContainer}>
           <View style={styles.userNameBox}>
             <View style={styles.imageBox}>
-              <Image source={require('../../assets/images/character.png')} style={styles.userImage}/>
+              <Image source={require('../../assets/images/character.png')} style={styles.userImage} />
             </View>
-            <Text style={styles.userName}>Doan Le Vy </Text>
+            <Text style={styles.userName}>{userName || 'Guest'}</Text>
           </View>
 
           <View style={styles.notificationButton}>
@@ -93,18 +112,33 @@ export default function Home() {
           style={styles.tourScrollView}
           refreshControl={
             <RefreshControl
-              refreshing={refreshing} // Trạng thái refresh
-              onRefresh={onRefresh} // Hàm xử lý khi refresh
-              colors={[Colors.DARK_GREEN]} // Màu của hiệu ứng refresh
-              tintColor={Colors.DARK_GREEN} // Màu của icon refresh
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[Colors.DARK_GREEN]}
+              tintColor={Colors.DARK_GREEN}
             />
           }
         >
-          {tours.map(tour => (
-            <TouchableOpacity key={tour.id} style={styles.tourCard} onPress={() => router.push({pathname: '/tourFinalPreview', params: {docId: tour.id}})}>
-              <Image source={ {uri: tour.tripData.places_to_visit[0].image_url} } style={styles.tourImage} />
+          {tours.map((tour) => (
+            <TouchableOpacity
+              key={tour.id}
+              style={styles.tourCard}
+              onPress={() =>
+                router.push({ pathname: '/tourFinalPreview', params: { docId: tour.id } })
+              }
+            >
+              <Image
+                source={{ uri: tour.tripData.places_to_visit[0].image_url }}
+                style={styles.tourImage}
+              />
               <Text style={styles.tourDestination}>{tour.Destination}</Text>
-              <Text style={styles.tourDate}>{new Intl.DateTimeFormat('en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'}).format(new Date(tour.StartDate))}</Text>
+              <Text style={styles.tourDate}>
+                {new Intl.DateTimeFormat('en-GB', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                }).format(new Date(tour.StartDate))}
+              </Text>
               <View style={styles.tourMarker}>
                 <Feather name="bookmark" size={20} color="white" />
               </View>

@@ -39,6 +39,7 @@ export default function MyTrip() {
   const [searchResult, setSearchResult] = useState(null); // State để lưu trữ kết quả tìm kiếm
   const [currentUserEmail, setCurrentUserEmail] = useState(''); // State để lưu trữ email của người dùng hiện tại
   const [refreshing, setRefreshing] = useState(false); // State để quản lý trạng thái refresh
+  const [userName, setUserName] = useState('');
 
   // Hàm lấy email người dùng hiện tại để tham gia tour du lịch
   useEffect(() => {
@@ -46,12 +47,30 @@ export default function MyTrip() {
       const user = await AsyncStorage.getItem('userSession');
       if (user) {
         const userData = JSON.parse(user);
-        setCurrentUserEmail(userData.email);
-        fetchTours(userData.email); // Gọi hàm fetchTours với email của người dùng
+        setCurrentUserEmail(userData.email); // Set current user's email
+        fetchUserName(userData.email); // Fetch user's full name from Firestore
+        fetchTours(userData.email); // Fetch the tours for this user
       }
     };
     checkSession();
   }, []);
+
+  const fetchUserName = async (email) => {
+    try {
+      const usersQuery = query(collection(db, 'users'), where('email', '==', email));
+      const querySnapshot = await getDocs(usersQuery);
+      
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0]; // Get the first matching document
+        const userData = userDoc.data();
+        setUserName(userData.fullName || ''); // Set the full name or fallback to an empty string
+      } else {
+        console.warn('No matching user document found');
+      }
+    } catch (error) {
+      console.error('Error fetching user name: ', error);
+    }
+  };
 
   // Hàm sao chép mã code vào clipboard
   const copyToClipboard = async (code) => {
@@ -140,7 +159,7 @@ export default function MyTrip() {
               <View style={styles.imageBox}>
                 <Image source={require('../../assets/images/character.png')} style={styles.userImage} />
               </View>
-              <Text style={styles.userName}>Doan Le Vy </Text>
+              <Text style={styles.userName}>{userName || 'Guest'}</Text>
             </View>
 
             <View style={styles.searchContainer}>

@@ -5,6 +5,8 @@ import { styles } from '../../../styles/SignUp_style';
 import { auth } from '../../../configs/FireBaseConfig';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from 'expo-router'
+import { db } from '../../../configs/FireBaseConfig';
+import { doc, setDoc } from 'firebase/firestore';
 
 export default function SignUp() {
 
@@ -29,7 +31,8 @@ export default function SignUp() {
 
   const router = useRouter();
 
-  const OnCreateAccount = () => {
+
+  const OnCreateAccount = async () => {
     // Check if all fields are filled
     if (!email || !password || !fullName || !loginName) {
       Alert.alert("Vui lòng nhập đầy đủ thông tin");
@@ -49,19 +52,27 @@ export default function SignUp() {
       return;
     }
   
-    // Create account using Firebase
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed up
-        const user = userCredential.user;
-        router.replace('/home');
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        Alert.alert("Đăng ký thất bại", errorMessage);
+    try {
+      // Create account using Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+  
+      // Save user information to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        fullName,
+        email,
+        loginName,
+        birthDate: date.toISOString(), // Save date as ISO string for consistency
+        createdAt: new Date().toISOString(),
       });
-    };
+  
+      Alert.alert("Đăng ký thành công", "Tài khoản của bạn đã được tạo!");
+      router.replace('/home');
+    } catch (error) {
+      const errorMessage = error.message;
+      Alert.alert("Đăng ký thất bại", errorMessage);
+    }
+  };
   
   return (
     <ImageBackground source={require('../../../assets/images/Login_Page.jpg')} style={styles.SignUpPageBackGround}>
