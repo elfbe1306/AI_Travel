@@ -44,7 +44,11 @@ export const styles = StyleSheet.create({
     fontFamily: 'nunito-bold',
     color: Colors.LIME_GREEN
   },
-  imagePic: {
-    
+  userImage: {
+    left: -225,
+    top: -200,
+    width: 700,
+    height: 700,
+    resizeMode: 'contain',
   }
 });
