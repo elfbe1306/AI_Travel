@@ -4,8 +4,9 @@ import { Colors } from '../../constants/Colors';
 import Feather from '@expo/vector-icons/Feather';
 import { styles } from '../../styles/home_style';
 
-import { useRouter } from 'expo-router';
-import { collection, getDocs } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { collection, getDocs, query, where, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../configs/FireBaseConfig';
 
 export default function Home() {
