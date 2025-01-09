@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList, ScrollView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import {styles} from '../../styles/moneySharingTable_style';
@@ -110,52 +110,55 @@ export default function MoneySharingTable() {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.firstHeaderContainer}>
-        <View style={styles.userNameBox}>
-          <View style={styles.imageBox}>
-            <Image source={require('../../assets/images/character.png')} style={styles.userImage} />
+    <FlatList
+      style={styles.container}
+      data={parsedCategories}
+      keyExtractor={(item, index) => `${item.name}-${index}`}
+      renderItem={renderItem}
+      ListHeaderComponent={
+        <>
+          <View style={styles.firstHeaderContainer}>
+            <View style={styles.userNameBox}>
+              <View style={styles.imageBox}>
+                <Image
+                  source={require('../../assets/images/character.png')}
+                  style={styles.userImage}
+                />
+              </View>
+              <Text style={styles.userName}>Doan Le Vy</Text>
+            </View>
+            <View style={styles.notificationButton}>
+              <Feather name="bell" size={30} color="black" />
+            </View>
           </View>
-          <Text style={styles.userName}>Doan Le Vy</Text>
+          <Text style={styles.firstTitle}>Phân chia chi phí</Text>
+          <View style={styles.tableHeader}>
+            <Text style={styles.tableHeaderText1}>Tên mục</Text>
+            <Text style={styles.tableHeaderText1}>Số tiền</Text>
+            <Text style={styles.tableHeaderText2}>Người tham gia</Text>
+            <Text style={styles.tableHeaderText2}>Người ứng tiền</Text>
+          </View>
+        </>
+      }
+      ListFooterComponent={
+        <View style={styles.Footer}>
+          <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
+            <Text style={styles.nextButtonText}>Quay lại</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: '/moneySharingFinal',
+                params: { updatedCategories: JSON.stringify(updatedCategories) },
+              })
+            }
+            style={styles.nextButton}
+          >
+            <Text style={styles.nextButtonText}>Lưu</Text>
+          </TouchableOpacity>
         </View>
-
-        <View style={styles.notificationButton}>
-          <Feather name="bell" size={30} color="black" />
-        </View>
-      </View>
-      <Text style={styles.firstTitle}> Phân chia chi phí </Text>
-      <View style={styles.tableFrame}>
-        <View style={styles.tableHeader}>
-          <Text style={styles.tableHeaderText1}>Tên mục</Text>
-          <Text style={styles.tableHeaderText1}>Số tiền</Text>
-          <Text style={styles.tableHeaderText2}>Người tham gia</Text>
-          <Text style={styles.tableHeaderText2}>Người ứng tiền</Text>
-        </View>
-        <FlatList
-          data={parsedCategories}
-          keyExtractor={(item, index) => `${item.name}-${index}`}
-          renderItem={renderItem}
-        />
-      </View>
-
-      <View style={styles.Footer}>
-        <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
-          <Text style={styles.nextButtonText}>Quay lại</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          onPress={() => 
-            router.push({
-              pathname: '/moneySharingFinal',
-              params: { updatedCategories: JSON.stringify(updatedCategories) }
-            })
-          } 
-          style={styles.nextButton}
-        >
-          <Text style={styles.nextButtonText}>Lưu</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      }
+    />
   );
 }
 
