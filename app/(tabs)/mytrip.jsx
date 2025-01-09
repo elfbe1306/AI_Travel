@@ -6,11 +6,11 @@ import { styles } from '../../styles/mytrip_style';
 
 import * as Clipboard from 'expo-clipboard'; // Import thư viện Clipboard
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { collection, getDocs, query, where, doc, setDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, setDoc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { db } from '../../configs/FireBaseConfig';
 
-function ResultDropDown({ visible, onClose, tour }) {
+function ResultDropDown({ visible, onClose, tour, onJoinTour }) {
   if (!visible || !tour) return null;
 
   return (
@@ -22,7 +22,7 @@ function ResultDropDown({ visible, onClose, tour }) {
         <Text style={styles.searchResultDate}>
           {new Date(tour.StartDate).toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'})}
         </Text>
-        <TouchableOpacity style={styles.tourJoinButton}>
+        <TouchableOpacity style={styles.tourJoinButton} onPress={() => onJoinTour(tour.id)}>
           <Text style={styles.tourJoinButtonText}>Tham gia</Text>
         </TouchableOpacity>
       </View>
@@ -37,6 +37,18 @@ export default function MyTrip() {
   const [showResultDropDown, setShowResultDropDown] = useState(false); // State để quản lý việc hiển thị ResultDropDown
   const [searchText, setSearchText] = useState(''); // State để lưu trữ giá trị nhập vào ô tìm kiếm
   const [searchResult, setSearchResult] = useState(null); // State để lưu trữ kết quả tìm kiếm
+  const [currentUserEmail, setCurrentUserEmail] = useState('user1@example.com'); // Giả định email của người dùng hiện tại
+
+  // Hàm lấy email người dùng hiện tại để tham gia tour du lịch
+  useEffect(() => {
+    const checkSession = async () => {
+      const user = await AsyncStorage.getItem('userSession');
+      if (user) {
+        setCurrentUserEmail(JSON.parse(user).email);
+      }
+    };
+    checkSession();
+  }, []);
 
   // Hàm sao chép mã code vào clipboard
   const copyToClipboard = async (code) => {
@@ -83,6 +95,22 @@ export default function MyTrip() {
     }
   };
 
+  // Hàm xử lý tham gia tour
+  const handleJoinTour = async (tourId) => {
+    try {
+      const tourRef = doc(db, 'UserTrips', tourId); // Tham chiếu đến document của tour
+      await updateDoc(tourRef, {
+        participants: arrayUnion(currentUserEmail), // Thêm email của người dùng hiện tại vào mảng participants
+      });
+      Alert.alert('Thành công', 'Bạn đã tham gia tour thành công!');
+      setShowResultDropDown(false); // Ẩn dropdown sau khi tham gia
+      fetchTours(); // Cập nhật lại danh sách tour
+    } catch (error) {
+      console.error('Lỗi khi tham gia tour: ', error);
+      Alert.alert('Lỗi', 'Đã xảy ra lỗi khi tham gia tour.'); // Hiển thị thông báo lỗi
+    }
+  };
+
   // Sử dụng useEffect để gọi hàm fetchTours mỗi khi component được render
   useEffect(() => {
     fetchTours();
@@ -119,7 +147,12 @@ export default function MyTrip() {
                 />
               </View>
 
-              <ResultDropDown visible={showResultDropDown} onClose={() => setShowResultDropDown(false)} tour={searchResult} />
+              <ResultDropDown 
+                visible={showResultDropDown} 
+                onClose={() => setShowResultDropDown(false)} 
+                tour={searchResult} 
+                onJoinTour={handleJoinTour} // Truyền hàm handleJoinTour vào ResultDropDown
+              />
             </View>
           </View>
         </View>
