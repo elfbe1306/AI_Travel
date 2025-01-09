@@ -193,11 +193,13 @@ export default function MoneySharingFinal() {
         <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
-
-        <TouchableOpacity style={styles.returnHome} onPress={() => router.replace()}>
+      </View>
+      <View style={styles.button2Container}>
+        <TouchableOpacity style={styles.returnHome} onPress={() => router.replace('/home')}>
           <Ionicons name="home-outline" size={24} color="black" />
         </TouchableOpacity>
       </View>
+      
     </ScrollView>
   );
 }
@@ -314,4 +316,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 99,
   },
+
+  button2Container: {
+    alignSelf:'center',
+    marginVertical:'56%',
+  }
 });

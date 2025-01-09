@@ -113,7 +113,7 @@ export default function SignUp() {
             <Text style = {styles.SignUpButtonText}>Lưu</Text>
           </TouchableOpacity>
 
-          <Text style = {styles.SignUpBoxGoogleText}>or continue with</Text>
+          <Text style = {styles.SignUpBoxGoogleText}>hoặc Tiếp tục với</Text>
 
           <TouchableOpacity style = {styles.SignUpGoogleButton}>
             <Image source={require('../../../assets/images/Google_Icon.png')}/>
