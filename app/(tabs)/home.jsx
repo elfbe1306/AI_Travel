@@ -56,6 +56,10 @@ export default function Home() {
       const toursData = [];
       querySnapshot.forEach((doc) => {
         const tourData = doc.data();
+        if (tourData.userEmail === userEmail) {
+          toursData.push({ id: doc.id, ...tourData });
+        }
+
         if (tourData.participants && tourData.participants.includes(userEmail)) {
           toursData.push({ id: doc.id, ...tourData });
         }

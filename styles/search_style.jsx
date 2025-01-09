@@ -43,5 +43,8 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'nunito-bold',
     color: Colors.LIME_GREEN
+  },
+  imagePic: {
+    
   }
 });

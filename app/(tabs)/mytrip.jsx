@@ -91,6 +91,10 @@ export default function MyTrip() {
       const toursData = [];
       querySnapshot.forEach((doc) => {
         const tourData = doc.data();
+        if (tourData.userEmail === userEmail) {
+          toursData.push({ id: doc.id, ...tourData });
+        }
+
         if (tourData.participants && tourData.participants.includes(userEmail)) {
           toursData.push({ id: doc.id, ...tourData });
         }
@@ -209,7 +213,14 @@ export default function MyTrip() {
             }
           >
             {tours.map(tour => (
-              <TouchableOpacity key={tour.id} style={styles.tourCard} onPress={() => router.push({ pathname: '/tourStart', params: { docIdForEdit: tour.id } })}>
+              <TouchableOpacity 
+                key={tour.id} style={styles.tourCard} 
+                onPress={() => 
+                  router.push({ 
+                    pathname: '/tourFinalPreview', 
+                    params: { docId: tour.id } })
+                }
+              >
                 <Image 
                   source={{ uri: tourImages[tour.id] }} 
                   style={styles.tourImage} 

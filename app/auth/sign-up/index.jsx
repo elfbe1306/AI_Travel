@@ -7,6 +7,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from 'expo-router'
 import { db } from '../../../configs/FireBaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SignUp() {
 
@@ -30,7 +31,6 @@ export default function SignUp() {
   const [loginName, setLoginName] = useState();
 
   const router = useRouter();
-
 
   const OnCreateAccount = async () => {
     // Check if all fields are filled
@@ -65,6 +65,9 @@ export default function SignUp() {
         birthDate: date.toISOString(), // Save date as ISO string for consistency
         createdAt: new Date().toISOString(),
       });
+  
+      // Save session to AsyncStorage
+      await AsyncStorage.setItem('userSession', JSON.stringify({ uid: user.uid, email: user.email }));
   
       Alert.alert("Đăng ký thành công", "Tài khoản của bạn đã được tạo!");
       router.replace('/home');

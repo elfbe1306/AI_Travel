@@ -2,6 +2,9 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList, ScrollView, 
 import React, { useEffect, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Colors } from '../../constants/Colors'
+import { query, collection, where, getDocs } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { db } from '../../configs/FireBaseConfig';
 
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -36,6 +39,37 @@ export default function MoneySharingTable() {
       payers: [],
     }))
   );
+
+  // Check session and fetch user name when the component mounts
+  const [userName, setUserName] = useState('');
+  useEffect(() => {
+    const checkSession = async () => {
+      const user = await AsyncStorage.getItem('userSession');
+      if (user) {
+        const userData = JSON.parse(user);
+        fetchUserName(userData.email); // Fetch user's name
+      }
+    };
+    checkSession();
+  }, []);
+
+  // Fetch the user name from Firestore based on the email
+  const fetchUserName = async (email) => {
+    try {
+      const usersQuery = query(collection(db, 'users'), where('email', '==', email));
+      const querySnapshot = await getDocs(usersQuery);
+      
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0]; // Get the first matching document
+        const userData = userDoc.data();
+        setUserName(userData.fullName || ''); // Use fullName or fallback to an empty string
+      } else {
+        console.warn('No matching user document found');
+      }
+    } catch (error) {
+      console.error('Error fetching user name: ', error);
+    }
+  };
 
   const toggleParticipantSelection = (categoryIndex, key, person) => {
     // Update selectedParticipants
@@ -127,7 +161,7 @@ export default function MoneySharingTable() {
                   style={styles.userImage}
                 />
               </View>
-              <Text style={styles.userName}>Doan Le Vy</Text>
+              <Text style={styles.userName}>{userName}</Text>
             </View>
             <View style={styles.notificationButton}>
               <Feather name="bell" size={30} color="black" />

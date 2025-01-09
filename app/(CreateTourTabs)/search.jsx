@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Dimensions } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Dimensions, Image } from 'react-native'
 import React, { useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -55,6 +55,8 @@ export default function Search() {
       >
         <Text style={styles.continueButtonText}>Tiếp tục</Text>
       </TouchableOpacity>
+
+      <Image style={styles.imagePic} source={require('../../assets/images/character.png')}/>
     </View>
   )
 }
