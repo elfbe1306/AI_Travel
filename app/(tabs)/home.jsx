@@ -14,6 +14,7 @@ export default function Home() {
   const [tours, setTours] = useState([]); // State to store tours
   const [currentUserEmail, setCurrentUserEmail] = useState(''); // State to store current user's email
   const [userName, setUserName] = useState(''); // State to store user's name
+  const [tourImages, setTourImages] = useState({}); // State to store images for tours
   const [refreshing, setRefreshing] = useState(false); // State to manage refresh state
 
   // Fetch user session and user name
@@ -60,10 +61,35 @@ export default function Home() {
         }
       });
       setTours(toursData);
+
+      // Fetch the tour images for each tour
+      const fetchedImages = {};
+      for (const tour of toursData) {
+        const photoReference = await GetPhotoRef(tour.Destination);
+        if (photoReference) {
+          fetchedImages[tour.id] = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoReference}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`;
+        }
+      }
+      setTourImages(fetchedImages);
+
     } catch (error) {
       console.error('Error fetching tours: ', error);
     } finally {
       setRefreshing(false);
+    }
+  };
+
+  // Get the photo reference from Google Places API
+  const GetPhotoRef = async (PlaceName) => {
+    try {
+      const resp = await fetch(
+        `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${PlaceName}&key=${process.env.EXPO_PUBLIC_PHOTO_GOOGLE_API_KEY}`
+      );
+      const result = await resp.json();
+      return result?.results[0]?.photos[0]?.photo_reference;
+    } catch (error) {
+      console.error("Error fetching photo reference:", error);
+      return null;
     }
   };
 
@@ -128,7 +154,7 @@ export default function Home() {
               }
             >
               <Image
-                source={{ uri: tour.tripData.places_to_visit[0].image_url }}
+                source={{ uri: tourImages[tour.id] }} // Render image using tour image URL from Google Places API
                 style={styles.tourImage}
               />
               <Text style={styles.tourDestination}>{tour.Destination}</Text>
