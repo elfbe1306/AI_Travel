@@ -54,7 +54,7 @@ export default function MyTrip() {
   const [refreshing, setRefreshing] = useState(false);
   const [userName, setUserName] = useState('');
   const [tourImages, setTourImages] = useState({}); // To store fetched images by tour ID
-  const [tourOwnerName, setTourOwnerName] = useState('Other User')
+  const [tourOwnerName, setTourOwnerName] = useState('')
 
   useEffect(() => {
     const checkSession = async () => {
@@ -142,7 +142,7 @@ export default function MyTrip() {
       if (!querySnapshot.empty) {
         const userDoc = querySnapshot.docs[0];
         const userData = userDoc.data();
-        setTourOwnerName(() => userData.fullName || 'Default User');
+        setTourOwnerName(() => userData.fullName || '');
       } else {
         console.warn('No matching user document found');
       }
@@ -157,10 +157,11 @@ export default function MyTrip() {
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        setSearchResult({ id: docSnap.id, ...docSnap.data() });
-        // console.log('before:', searchResult.userEmail)
-        await fetchSearchTourUserName(searchResult.userEmail)
-        // console.log('after: ', tourOwnerName)
+        const tourData = docSnap.data();
+        setSearchResult({ id: docSnap.id, ...tourData });
+  
+        // Fetch the owner's name before showing the dropdown
+        await fetchSearchTourUserName(tourData.userEmail); // Đảm bảo fetch hoàn thành trước khi hiển thị dropdown
         setShowResultDropDown(true);
       } else {
         Alert.alert('Không tìm thấy', 'Không có tour nào với ID này.');
