@@ -194,7 +194,7 @@ export default function MoneySharingFinal() {
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.returnHome} onPress={() => router.replace()}>
+        <TouchableOpacity style={styles.returnHome} onPress={() => router.replace('/home')}>
           <Ionicons name="home-outline" size={24} color="black" />
         </TouchableOpacity>
       </View>

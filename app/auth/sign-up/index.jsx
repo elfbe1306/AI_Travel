@@ -28,13 +28,12 @@ export default function SignUp() {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [fullName, setFullName] = useState();
-  const [loginName, setLoginName] = useState();
 
   const router = useRouter();
 
   const OnCreateAccount = async () => {
     // Check if all fields are filled
-    if (!email || !password || !fullName || !loginName) {
+    if (!email || !password || !fullName) {
       Alert.alert("Vui lòng nhập đầy đủ thông tin");
       return;
     }
@@ -61,7 +60,6 @@ export default function SignUp() {
       await setDoc(doc(db, "users", user.uid), {
         fullName,
         email,
-        loginName,
         birthDate: date.toISOString(), // Save date as ISO string for consistency
         createdAt: new Date().toISOString(),
       });
@@ -103,8 +101,6 @@ export default function SignUp() {
                 />
               </View>
             )}
-
-            <TextInput style={styles.SignUpTextInput} placeholder="Tên đăng nhập:" placeholderTextColor={'black'} onChangeText={(value) => setLoginName(value)}/>
 
             <TextInput style={styles.SignUpTextInput} placeholder="Mật khẩu:" placeholderTextColor={'black'} secureTextEntry={true} onChangeText={(value) => setPassword(value)}/>
           </View>
