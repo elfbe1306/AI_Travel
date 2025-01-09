@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, ScrollView, TouchableHighlight, TextInput, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, TouchableHighlight, TextInput, Alert, TouchableWithoutFeedback, Keyboard, RefreshControl } from 'react-native'; // Thêm RefreshControl
 import React, { useState, useEffect } from 'react';
 import { Colors } from '../../constants/Colors';
 import Feather from '@expo/vector-icons/Feather';
@@ -37,14 +37,17 @@ export default function MyTrip() {
   const [showResultDropDown, setShowResultDropDown] = useState(false); // State để quản lý việc hiển thị ResultDropDown
   const [searchText, setSearchText] = useState(''); // State để lưu trữ giá trị nhập vào ô tìm kiếm
   const [searchResult, setSearchResult] = useState(null); // State để lưu trữ kết quả tìm kiếm
-  const [currentUserEmail, setCurrentUserEmail] = useState('user1@example.com'); // Giả định email của người dùng hiện tại
+  const [currentUserEmail, setCurrentUserEmail] = useState(''); // State để lưu trữ email của người dùng hiện tại
+  const [refreshing, setRefreshing] = useState(false); // State để quản lý trạng thái refresh
 
   // Hàm lấy email người dùng hiện tại để tham gia tour du lịch
   useEffect(() => {
     const checkSession = async () => {
       const user = await AsyncStorage.getItem('userSession');
       if (user) {
-        setCurrentUserEmail(JSON.parse(user).email);
+        const userData = JSON.parse(user);
+        setCurrentUserEmail(userData.email);
+        fetchTours(userData.email); // Gọi hàm fetchTours với email của người dùng
       }
     };
     checkSession();
@@ -62,17 +65,29 @@ export default function MyTrip() {
   };
 
   // Hàm để lấy dữ liệu từ Firebase
-  const fetchTours = async () => {
+  const fetchTours = async (userEmail) => {
     try {
       const querySnapshot = await getDocs(collection(db, 'UserTrips')); // 'UserTrips' là tên collection trong Firestore
       const toursData = [];
       querySnapshot.forEach((doc) => {
-        toursData.push({ id: doc.id, ...doc.data() }); // Lấy dữ liệu và thêm vào mảng
+        const tourData = doc.data();
+        // Kiểm tra xem người dùng hiện tại có trong mảng participants không
+        if (tourData.participants && tourData.participants.includes(userEmail)) {
+          toursData.push({ id: doc.id, ...tourData }); // Lấy dữ liệu và thêm vào mảng
+        }
       });
       setTours(toursData); // Cập nhật state với dữ liệu mới
     } catch (error) {
       console.error('Error fetching tours: ', error);
+    } finally {
+      setRefreshing(false); // Dừng hiệu ứng refresh sau khi hoàn thành
     }
+  };
+
+  // Hàm xử lý khi người dùng kéo xuống để refresh
+  const onRefresh = async () => {
+    setRefreshing(true); // Bắt đầu hiệu ứng refresh
+    await fetchTours(currentUserEmail); // Gọi lại hàm fetchTours để cập nhật dữ liệu
   };
 
   // Hàm tìm kiếm tour bằng ID
@@ -104,17 +119,12 @@ export default function MyTrip() {
       });
       Alert.alert('Thành công', 'Bạn đã tham gia tour thành công!');
       setShowResultDropDown(false); // Ẩn dropdown sau khi tham gia
-      fetchTours(); // Cập nhật lại danh sách tour
+      fetchTours(currentUserEmail); // Cập nhật lại danh sách tour
     } catch (error) {
       console.error('Lỗi khi tham gia tour: ', error);
       Alert.alert('Lỗi', 'Đã xảy ra lỗi khi tham gia tour.'); // Hiển thị thông báo lỗi
     }
   };
-
-  // Sử dụng useEffect để gọi hàm fetchTours mỗi khi component được render
-  useEffect(() => {
-    fetchTours();
-  }, []);
 
   // Hàm xử lý sự kiện scroll
   const handleScroll = () => {
@@ -164,6 +174,14 @@ export default function MyTrip() {
             showsVerticalScrollIndicator={false}
             onScroll={handleScroll} // Thêm sự kiện onScroll
             scrollEventThrottle={16} // Đảm bảo sự kiện scroll được gọi thường xuyên
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing} // Trạng thái refresh
+                onRefresh={onRefresh} // Hàm xử lý khi refresh
+                colors={[Colors.DARK_GREEN]} // Màu của hiệu ứng refresh
+                tintColor={Colors.DARK_GREEN} // Màu của icon refresh
+              />
+            }
           >
             {tours.map(tour => (
               <TouchableOpacity key={tour.id} style={styles.tourCard} onPress={() => router.push({ pathname: '/tourStart', params: { docIdForEdit: tour.id } })}>

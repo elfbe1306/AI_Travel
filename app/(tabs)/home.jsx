@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, RefreshControl } from 'react-native'; // Thêm RefreshControl
 import React, { useState, useEffect } from 'react';
 import { Colors } from '../../constants/Colors';
 import Feather from '@expo/vector-icons/Feather';
@@ -9,37 +9,50 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { collection, getDocs, query, where, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../configs/FireBaseConfig';
 
-// Mockup data for tours
-const mockTours = [
-  { id: 1, tourDestination: 'QUY NHƠN', tourDate: '02/01/2025', image: require('../../assets/images/homeTourQuyNhon.png') },
-  { id: 2, tourDestination: 'HÀ NỘI', tourDate: '03/09/2025', image: require('../../assets/images/homeTourHaNoi.png') },
-  // Add more tours as needed
-];
-
 export default function Home() {
   const router = useRouter();
   const [tours, setTours] = useState([]); // State để lưu trữ dữ liệu tour
+  const [currentUserEmail, setCurrentUserEmail] = useState(''); // State để lưu trữ email của người dùng hiện tại
+  const [refreshing, setRefreshing] = useState(false); // State để quản lý trạng thái refresh
+
+  // Hàm lấy email người dùng hiện tại để tham gia tour du lịch
+  useEffect(() => {
+    const checkSession = async () => {
+      const user = await AsyncStorage.getItem('userSession');
+      if (user) {
+        const userData = JSON.parse(user);
+        setCurrentUserEmail(userData.email);
+        fetchTours(userData.email); // Gọi hàm fetchTours với email của người dùng
+      }
+    };
+    checkSession();
+  }, []);
 
   // Hàm để lấy dữ liệu từ Firebase
-  const fetchTours = async () => {
+  const fetchTours = async (userEmail) => {
     try {
       const querySnapshot = await getDocs(collection(db, 'UserTrips')); // 'UserTrips' là tên collection trong Firestore
       const toursData = [];
       querySnapshot.forEach((doc) => {
-        toursData.push({ id: doc.id, ...doc.data() }); // Lấy dữ liệu và thêm vào mảng
+        const tourData = doc.data();
+        // Kiểm tra xem người dùng hiện tại có trong mảng participants không
+        if (tourData.participants && tourData.participants.includes(userEmail)) {
+          toursData.push({ id: doc.id, ...tourData }); // Lấy dữ liệu và thêm vào mảng
+        }
       });
-      // toursData.map(tour => console.log(tour.tripData.places_to_visit[0].image_url))
       setTours(toursData); // Cập nhật state với dữ liệu mới
     } catch (error) {
       console.error('Error fetching tours: ', error);
+    } finally {
+      setRefreshing(false); // Dừng hiệu ứng refresh sau khi hoàn thành
     }
   };
 
-  // Sử dụng useEffect để gọi hàm fetchTours mỗi khi component được render
-  useEffect(() => {
-    fetchTours();
-  }, []);
-
+  // Hàm xử lý khi người dùng kéo xuống để refresh
+  const onRefresh = async () => {
+    setRefreshing(true); // Bắt đầu hiệu ứng refresh
+    await fetchTours(currentUserEmail); // Gọi lại hàm fetchTours để cập nhật dữ liệu
+  };
 
   return (
     <View style={{backgroundColor: Colors.LIME_GREEN, flex: 1}}>
@@ -74,7 +87,19 @@ export default function Home() {
           </TouchableOpacity>
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tourScrollView}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tourScrollView}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing} // Trạng thái refresh
+              onRefresh={onRefresh} // Hàm xử lý khi refresh
+              colors={[Colors.DARK_GREEN]} // Màu của hiệu ứng refresh
+              tintColor={Colors.DARK_GREEN} // Màu của icon refresh
+            />
+          }
+        >
           {tours.map(tour => (
             <TouchableOpacity key={tour.id} style={styles.tourCard} onPress={() => router.push({pathname: '/tourFinalPreview', params: {docId: tour.id}})}>
               <Image source={ {uri: tour.tripData.places_to_visit[0].image_url} } style={styles.tourImage} />
@@ -88,5 +113,5 @@ export default function Home() {
         </ScrollView>
       </View>
     </View>
-  )
+  );
 }
