@@ -68,20 +68,8 @@ export const styles = StyleSheet.create({
       color: '#0A6138',
     },
 
-    billValue: {
-      height: 32,
-      marginVertical: '3%',
-      borderWidth: 1,
-      padding: 10,
-      width: '64%',
-      backgroundColor: 'white',
-      borderColor:'#DCD7D7',
-      borderRadius:16,
-    },
-
     bodyAddCategories: {
-      flexDirection:'row',
-      gap: FRAMEGAP,
+      flexDirection:'column',
       marginVertical: 12,
     },
 
@@ -121,9 +109,10 @@ export const styles = StyleSheet.create({
     },
 
     MoneyIcon: {
+      position: 'relative',
       color:'#0A6138',
-      marginTop:'40%',
-      marginRight:'-1%'
+      marginLeft: '90%',
+      marginTop: '-25%'
     },
 
     input: {
@@ -142,12 +131,12 @@ export const styles = StyleSheet.create({
 
 
     returnButton: {
-      position: 'absolute',
-      marginTop: '190%',
-      marginLeft: '6%',
       padding: 15,
       backgroundColor: 'white',
       borderRadius: 99,
+      marginLeft: '5%',
+      marginRight: '81%',
+      marginBottom: '20%'
     },
     nextButton: {
       backgroundColor: '#FFE68A',
@@ -155,6 +144,11 @@ export const styles = StyleSheet.create({
       width: 75,
       height:30,
       borderRadius: 16,
+      borderWidth:0.5,
+      borderColor:'#DCD7D7',
+      shadowColor: '#000',  // Shadow color
+      shadowOffset: { width: 0, height: 2},  
+      shadowOpacity: 0.5, 
     },
 
     nextButtonText: {

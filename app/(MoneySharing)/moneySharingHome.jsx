@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity, Image, TextInput, Alert, FlatList, Button } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Image, TextInput, Alert, FlatList, ScrollView} from 'react-native';
+import React, { useState} from 'react';
 import { useRouter } from 'expo-router';
-import { Colors } from '../../constants/Colors';
+
 import { styles } from '../../styles/moneySharingHome_style';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -10,9 +10,6 @@ import Entypo from '@expo/vector-icons/Entypo';
 
 export default function MoneySharing() {
   const router = useRouter();
-  const [billValue, setBillValue] = useState('');
-  const [categoryName, setCategoryName] = useState('');
-  const [categoryValue, setCategoryValue] = useState('');
   const [participants, setParticipants] = useState([]);
 
   const getRandomPastelColor = () => {
@@ -38,43 +35,36 @@ export default function MoneySharing() {
     setParticipants(updatedParticipants);
   };
 
+  const [categories, setCategories] = useState([{ name: '', value: '' }]);
+
+  const addCategoryInput = () => {
+    setCategories([...categories, { name: '', value: '' }]);
+  };
+
+  const updateCategory = (index, key, value) => {
+    const updatedCategories = [...categories];
+    updatedCategories[index][key] = value;
+    setCategories(updatedCategories);
+  };
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
-        <Ionicons name="chevron-back" size={24} color="black" />
-      </TouchableOpacity>
-      
-
-      <View style={styles.firstHeaderContainer}>
-        <View style={styles.userNameBox}>
-          <View style={styles.imageBox}>
-            <Image source={require('../../assets/images/character.png')} style={styles.userImage} />
+      <ScrollView>
+        <View style={styles.firstHeaderContainer}>
+          <View style={styles.userNameBox}>
+            <View style={styles.imageBox}>
+              <Image source={require('../../assets/images/character.png')} style={styles.userImage} />
+            </View>
+            <Text style={styles.userName}>Doan Le Vy</Text>
           </View>
-          <Text style={styles.userName}>Doan Le Vy</Text>
-        </View>
 
-        <View style={styles.notificationButton}>
-          <Feather name="bell" size={30} color="black" />
-        </View>
-      </View>
-
-      <Text style={styles.firstTitle}> Phân chia chi phí </Text>
-
-      <View>
-        <View style={{ flexDirection: 'row' }}>
-          <Text style={styles.bodyText}>Giá trị hoá đơn </Text>
-          <View style={styles.billValue}>
-            <TextInput
-              style={styles.input}
-              onChangeText={setBillValue}
-              value={billValue}
-              placeholder="1.000.000"
-              placeholderTextColor="#CED8E6"
-              keyboardType="numeric"
-            />
+          <View style={styles.notificationButton}>
+            <Feather name="bell" size={30} color="black" />
           </View>
         </View>
-        
+
+        <Text style={styles.firstTitle}> Phân chia chi phí </Text>
+
         <View style={{ flexDirection: 'row', alignItems: 'center',marginRight:'5%' }}>
           <Text style={styles.bodyText}>Người tham gia </Text>
           <FlatList
@@ -111,51 +101,66 @@ export default function MoneySharing() {
           />
           <TouchableOpacity onPress={addParticipantInput}>
           <Entypo name="plus" size={24} style={styles.plusIcon} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.bodyAddCategories}>
+          {categories.map((category, index) => (
+            <View key={index} style={{ marginBottom: 8 }}>
+              <View style={styles.bodyMoney}>
+                <Text style={styles.bodyText}>Tên mục cần chia chi phí </Text>
+                <View style={styles.bodyAddMoney1}>
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={(text) => updateCategory(index, 'name', text)}
+                    value={category.name}
+                    placeholder="Vé xem phim"
+                    placeholderTextColor="#CED8E6"
+                  />
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', marginLeft: '4%' }}>
+                <Text style={styles.bodyText}>Số tiền </Text>
+                <View style={styles.bodyAddMoney2}>
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={(text) => updateCategory(index, 'value', text)}
+                    value={category.value}
+                    placeholder="100.000"
+                    keyboardType="numeric"
+                    placeholderTextColor="#CED8E6"
+                  />
+                </View>
+              </View>
+            </View>
+          ))}
+          <TouchableOpacity onPress={addCategoryInput}>
+            <Entypo name="plus" size={24} style={styles.MoneyIcon} />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity
+          onPress={() => {
+            router.push({
+              pathname: '/moneySharingTable',
+              params: {
+                participants: JSON.stringify(participants),
+                categories: JSON.stringify(categories)
+              }
+           })
+          }}
+          style={styles.nextButton}
+        >
+          <Text style={styles.nextButtonText}>
+            Tiếp tục
+          </Text>
         </TouchableOpacity>
 
-        </View>
+        <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={24} color="black" />
+        </TouchableOpacity>
+      </ScrollView>
 
-        
-        <View style={styles.bodyAddCategories}>
-          <View style={styles.bodyMoney}>
-            <Text style={styles.bodyText}>Tên mục cần chia chi phí </Text>
-            <View style={styles.bodyAddMoney1}>
-              <TextInput
-                style={styles.input}
-                onChangeText={setCategoryName}
-                value={categoryName}
-                placeholder="Vé xem phim"
-                placeholderTextColor="#CED8E6"
-              />
-            </View>
-          </View>
-          <View style={{ flexDirection: 'row', marginLeft: '4%' }}>
-            <Text style={styles.bodyText}>Số tiền </Text>
-            <View style={styles.bodyAddMoney2}>
-              <TextInput
-                style={styles.input}
-                onChangeText={setCategoryValue}
-                value={categoryValue}
-                placeholder="100.000"
-                keyboardType="numeric"
-                placeholderTextColor="#CED8E6"
-              />
-            </View>
-            <TouchableOpacity>
-              <Entypo name="plus" size={24} style={styles.MoneyIcon} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      <View>
-      <TouchableOpacity
-        onPress={() => router.push('/moneySharingTable')}
-        style={styles.nextButton}>
-        <Text style={styles.nextButtonText}>
-          Tiếp tục
-        </Text>
-      </TouchableOpacity>
-      </View>
     </View>
   );
 }

@@ -1,24 +1,25 @@
-import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList } from 'react-native'
-import React, { useState } from 'react'
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router'
-import { Colors } from '../../constants/Colors';
+import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList, ScrollView } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import {styles} from '../../styles/moneySharingTable_style';
 
-
-import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
-//Lay data bo vo day
-const data = [
-  { "Ten_muc": "Ăn gà Texas", "So_tien": 100000, "Nguoi_tham_gia": ["Lê Vy", "Ngọc Nhơn"], "Nguoi_ung_tien": ["Song Khuê"] },
-  { "Ten_muc": "Ăn gà KFC", "So_tien": 200000, "Nguoi_tham_gia": ["Lê Vy"], "Nguoi_ung_tien": ["Song Khuê", "Ngọc Nhơn"] },
-];
-
 export default function MoneySharingTable() {
   const router = useRouter();
-  const [collapsedStates, setCollapsedStates] = useState(data.map(() => ({ thamGia: false, ungTien: false })));
+  const { participants, categories } = useLocalSearchParams();
+  const parsedParticipants = participants ? JSON.parse(participants) : [];
+  const parsedCategories = categories ? JSON.parse(categories) : [];
+
+  const [collapsedStates, setCollapsedStates] = useState(parsedCategories.map(() => ({ thamGia: false, ungTien: false })));
+  const [selectedParticipants, setSelectedParticipants] = useState(
+    parsedCategories.map(() => ({ thamGia: [], ungTien: [] }))
+  );
+
+  useEffect(() => {
+    console.log(parsedParticipants);
+  }, []);
 
   const toggleCollapse = (index, key) => {
     const newStates = [...collapsedStates];
@@ -26,97 +27,138 @@ export default function MoneySharingTable() {
     setCollapsedStates(newStates);
   };
 
+  const [updatedCategories, setUpdatedCategories] = useState(
+    parsedCategories.map((category) => ({
+      ...category,
+      participants: [],
+      payers: [],
+    }))
+  );
+
+  const toggleParticipantSelection = (categoryIndex, key, person) => {
+    // Update selectedParticipants
+    setSelectedParticipants((prev) => {
+      const newSelections = [...prev];
+      const selectedList = newSelections[categoryIndex][key];
+  
+      if (selectedList.some((p) => p.name === person.name)) {
+        newSelections[categoryIndex][key] = selectedList.filter((p) => p.name !== person.name);
+      } else {
+        newSelections[categoryIndex][key] = [...selectedList, person];
+      }
+  
+      // Sync updatedCategories
+      setUpdatedCategories((prevCategories) => {
+        const newCategories = [...prevCategories];
+        newCategories[categoryIndex][key === 'thamGia' ? 'participants' : 'payers'] =
+          newSelections[categoryIndex][key];
+        return newCategories;
+      });
+  
+      return newSelections;
+    });
+  };
+
   const renderItem = ({ item, index }) => (
     <View style={styles.tableContent}>
-      <Text style={styles.tableContentText}>{item.Ten_muc}</Text>
-      <Text style={styles.tableContentText}>{item.So_tien}</Text>
-
-      {/* Collapsible for Người tham gia */}
-      <View style={styles.collapsibleContainer}>
-        <TouchableOpacity onPress={() => toggleCollapse(index, 'thamGia')} style={styles.tableContentText}>
-          <AntDesign
-            name={collapsedStates[index].thamGia ? "caretup" : "caretdown"} 
-            size={16}
-            color="#02954F"
-            style={styles.collapsibleIcon}
-          />
-        </TouchableOpacity>
-        {collapsedStates[index].thamGia && (
-          <View style={styles.participantBox}>
-            {item.Nguoi_tham_gia.map((person, idx) => (
-              <Text key={idx} style={styles.tableContentText}>{person}</Text>
+      <Text style={styles.tableContentText}>{item.name}</Text>
+      <Text style={styles.tableContentText}>{item.value}</Text>
+  
+      {['thamGia', 'ungTien'].map((key) => (
+        <View key={key} style={styles.collapsibleContainer}>
+          <TouchableOpacity onPress={() => toggleCollapse(index, key)} style={styles.tableContentText}>
+            <AntDesign
+              name={collapsedStates[index][key] ? 'caretup' : 'caretdown'}
+              size={16}
+              color="#02954F"
+              style={styles.collapsibleIcon}
+            />
+          </TouchableOpacity>
+  
+          {collapsedStates[index][key] && (
+            <View style={styles.participantBox}>
+              {parsedParticipants.map((person, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  onPress={() => toggleParticipantSelection(index, key, person)}
+                  style={
+                    selectedParticipants[index][key].some((p) => p.name === person.name)
+                      ? styles.selectedParticipant
+                      : styles.unselectedParticipant
+                  }
+                >
+                  <Text style={styles.tableContentText}>{person.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+  
+          {/* Show Selected Participants with Background Color */}
+          <View style={styles.selectedNamesContainer}>
+            {selectedParticipants[index][key].map((participant, idx) => (
+              <View
+                key={idx}
+                style={[styles.nameBox, { backgroundColor: participant.color || '#E0F7FA' }]}
+              >
+                <Text style={styles.nameBoxText}>{participant.name}</Text>
+              </View>
             ))}
           </View>
-        )}
-      </View>
-
-      {/* Collapsible for Người ứng tiền */}
-      <View style={styles.collapsibleContainer}>
-        <TouchableOpacity onPress={() => toggleCollapse(index, 'ungTien')} style={styles.tableContentText}>
-        <AntDesign
-            name={collapsedStates[index].thamGia ? "caretup" : "caretdown"} 
-            size={16}
-            color="#02954F"
-            style={styles.collapsibleIcon}
-          />
-        </TouchableOpacity>
-        {collapsedStates[index].ungTien && (
-          <View style={styles.participantBox}>
-            {item.Nguoi_ung_tien.map((person, idx) => (
-              <Text key={idx} style={styles.tableContentText}>{person}</Text>
-            ))}
-          </View>
-        )}
-      </View>
+        </View>
+      ))}
     </View>
   );
 
   return (
-    <View style={styles.container}>
-
-      <View style={styles.firstHeaderContainer}>
-        <View style={styles.userNameBox}>
-          <View style={styles.imageBox}>
-            <Image source={require('../../assets/images/character.png')} style={styles.userImage} />
+    <FlatList
+      style={styles.container}
+      data={parsedCategories}
+      keyExtractor={(item, index) => `${item.name}-${index}`}
+      renderItem={renderItem}
+      ListHeaderComponent={
+        <>
+          <View style={styles.firstHeaderContainer}>
+            <View style={styles.userNameBox}>
+              <View style={styles.imageBox}>
+                <Image
+                  source={require('../../assets/images/character.png')}
+                  style={styles.userImage}
+                />
+              </View>
+              <Text style={styles.userName}>Doan Le Vy</Text>
+            </View>
+            <View style={styles.notificationButton}>
+              <Feather name="bell" size={30} color="black" />
+            </View>
           </View>
-          <Text style={styles.userName}>Doan Le Vy</Text>
+          <Text style={styles.firstTitle}>Phân chia chi phí</Text>
+          <View style={styles.tableHeader}>
+            <Text style={styles.tableHeaderText1}>Tên mục</Text>
+            <Text style={styles.tableHeaderText1}>Số tiền</Text>
+            <Text style={styles.tableHeaderText2}>Người tham gia</Text>
+            <Text style={styles.tableHeaderText2}>Người ứng tiền</Text>
+          </View>
+        </>
+      }
+      ListFooterComponent={
+        <View style={styles.Footer}>
+          <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
+            <Text style={styles.nextButtonText}>Quay lại</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: '/moneySharingFinal',
+                params: { updatedCategories: JSON.stringify(updatedCategories) },
+              })
+            }
+            style={styles.nextButton}
+          >
+            <Text style={styles.nextButtonText}>Lưu</Text>
+          </TouchableOpacity>
         </View>
-
-        <View style={styles.notificationButton}>
-          <Feather name="bell" size={30} color="black" />
-        </View>
-      </View>
-      <Text style={styles.firstTitle}> Phân chia chi phí </Text>
-      <View style={styles.tableFrame}>
-        <View style={styles.tableHeader}>
-          <Text style={styles.tableHeaderText1}>Tên mục</Text>
-          <Text style={styles.tableHeaderText1}>Số tiền</Text>
-          <Text style={styles.tableHeaderText2}>Người tham gia</Text>
-          <Text style={styles.tableHeaderText2}>Người ứng tiền</Text>
-        </View>
-        <FlatList
-          data={data}
-          keyExtractor={(item, index) => item.Ten_muc.toString()}
-          renderItem={renderItem}
-        />
-      </View>
-
-      <View style={styles.Footer}>
-        <TouchableOpacity style={styles.returnButton} onPress={() => router.back()}>
-        <Text style={styles.nextButtonText}>
-            Quay lại
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => router.push('/moneySharingFinal')}
-          style={styles.nextButton}>
-          <Text style={styles.nextButtonText}>
-            Tiếp tục
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      }
+    />
   );
 }
 
