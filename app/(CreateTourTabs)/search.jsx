@@ -55,8 +55,6 @@ export default function Search() {
       >
         <Text style={styles.continueButtonText}>Tiếp tục</Text>
       </TouchableOpacity>
-
-      <Image source={require('../../assets/images/character.png')} style={styles.userImage} />
     </View>
   )
 }

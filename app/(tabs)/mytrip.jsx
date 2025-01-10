@@ -23,13 +23,13 @@ const GetPhotoRef = async (PlaceName) => {
   }
 };
 
-function ResultDropDown({ visible, onClose, tour, onJoinTour }) {
+function ResultDropDown({ visible, onClose, tour, onJoinTour, tourOwnerName }) {
   if (!visible || !tour) return null;
 
   return (
     <View style={styles.searchResultDropdown}>
       <Text style={styles.searchResultTitle}>
-        Du lịch {tour.Destination} tạo bởi {tour.userName}
+        Du lịch {tour.Destination} tạo bởi {tourOwnerName}
       </Text>
       <View style={styles.searchResultDateAndJoinButton}>
         <Text style={styles.searchResultDate}>
@@ -54,6 +54,7 @@ export default function MyTrip() {
   const [refreshing, setRefreshing] = useState(false);
   const [userName, setUserName] = useState('');
   const [tourImages, setTourImages] = useState({}); // To store fetched images by tour ID
+  const [tourOwnerName, setTourOwnerName] = useState('')
 
   useEffect(() => {
     const checkSession = async () => {
@@ -82,6 +83,17 @@ export default function MyTrip() {
       }
     } catch (error) {
       console.error('Error fetching user name: ', error);
+    }
+  };
+
+    // Hàm sao chép mã code vào clipboard
+  const copyToClipboard = async (code) => {
+    try {
+      await Clipboard.setStringAsync(code); // Sao chép mã code vào clipboard
+      Alert.alert('Thành công', 'Mã code đã được sao chép!'); // Hiển thị thông báo
+    } catch (error) {
+      console.error('Lỗi khi sao chép mã code: ', error);
+      Alert.alert('Lỗi', 'Không thể sao chép mã code.'); // Hiển thị thông báo lỗi
     }
   };
 
@@ -122,13 +134,34 @@ export default function MyTrip() {
     await fetchTours(currentUserEmail);
   };
 
+  const fetchSearchTourUserName = async (email) => {
+    try {
+      const usersQuery = query(collection(db, 'users'), where('email', '==', email));
+      const querySnapshot = await getDocs(usersQuery);
+      
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        const userData = userDoc.data();
+        setTourOwnerName(() => userData.fullName || '');
+      } else {
+        console.warn('No matching user document found');
+      }
+    } catch (error) {
+      console.error('Error fetching user name: ', error);
+    }
+  };
+
   const searchTourById = async (id) => {
     try {
       const docRef = doc(db, 'UserTrips', id);
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        setSearchResult({ id: docSnap.id, ...docSnap.data() });
+        const tourData = docSnap.data();
+        setSearchResult({ id: docSnap.id, ...tourData });
+  
+        // Fetch the owner's name before showing the dropdown
+        await fetchSearchTourUserName(tourData.userEmail); // Đảm bảo fetch hoàn thành trước khi hiển thị dropdown
         setShowResultDropDown(true);
       } else {
         Alert.alert('Không tìm thấy', 'Không có tour nào với ID này.');
@@ -191,6 +224,7 @@ export default function MyTrip() {
                 onClose={() => setShowResultDropDown(false)} 
                 tour={searchResult} 
                 onJoinTour={handleJoinTour}
+                tourOwnerName={tourOwnerName}
               />
             </View>
           </View>
